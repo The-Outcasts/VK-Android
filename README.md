@@ -7,3 +7,7 @@
 - [Никита](https://github.com/NaTukaa)
 - [Ростислав](https://github.com/sunzedd)
 - [Егор](https://github.com/BurtsE)
+
+<hr>
+
+[Техническое Задание](https://docs.google.com/document/d/1wT09LvsoQzZkslI44uDC0JznqZltlnLlQRmwWNH-luw/edit?usp=sharing)
