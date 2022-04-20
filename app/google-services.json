@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "772178270633",
+    "project_id": "vk-android-efc7c",
+    "storage_bucket": "vk-android-efc7c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:772178270633:android:8bba78d1a26561dcf90cb8",
+        "android_client_info": {
+          "package_name": "com.theoutcasts.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "772178270633-g2higoru055u1c9vmtrnbtgqd5ghk1bi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA2Oj_mK9HTc-hdgaWvtuKODXufJuRDFfM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "772178270633-g2higoru055u1c9vmtrnbtgqd5ghk1bi.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
