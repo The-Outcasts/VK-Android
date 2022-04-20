@@ -9,6 +9,7 @@ import android.widget.EditText
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.theoutcasts.app.domain.repository.firebase.AuthRepositoryImpl
 
 class SigninActivity : AppCompatActivity() {
     private lateinit var firebaseAuthService: FirebaseAuth
@@ -43,7 +44,6 @@ class SigninActivity : AppCompatActivity() {
                         if (it.isSuccessful) {
                             val firebaseUser: FirebaseUser = it.result!!.user!!
                             val intent = Intent(this@SigninActivity, MainActivity::class.java)
-                            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
                             intent.putExtra("user_id", firebaseUser.uid)
                             intent.putExtra("email", firebaseUser.email)
                             startActivity(intent)
@@ -58,6 +58,12 @@ class SigninActivity : AppCompatActivity() {
                     }
                 }
             }
+        }
+
+        findViewById<Button>(R.id.signup_btn_already_registered).setOnClickListener() {
+            val intent = Intent(this@SigninActivity, SignupActivity::class.java)
+            startActivity(intent)
+            finish()
         }
     }
 }
