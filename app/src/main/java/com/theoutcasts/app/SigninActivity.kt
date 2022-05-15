@@ -9,7 +9,6 @@ import android.widget.EditText
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.theoutcasts.app.domain.repository.firebase.AuthRepositoryImpl
 
 class SigninActivity : AppCompatActivity() {
     private lateinit var firebaseAuthService: FirebaseAuth
