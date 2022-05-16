@@ -7,17 +7,20 @@ import android.text.TextUtils
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
+import com.theoutcasts.app.domain.model.User
+import com.theoutcasts.app.domain.repository.UserRepository
+import com.theoutcasts.app.repository.firebase.UserRepositoryImpl
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class SignupActivity : AppCompatActivity() {
-    private lateinit var firebaseAuthService: FirebaseAuth
+class SignUpActivity : AppCompatActivity() {
+    private var userRepository: UserRepository = UserRepositoryImpl()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_signup)
-
-        firebaseAuthService = FirebaseAuth.getInstance()
 
         findViewById<Button>(R.id.signup_btn).setOnClickListener() {
             var email = findViewById<EditText>(R.id.signup_et_email).text.toString().trim()
@@ -26,36 +29,33 @@ class SignupActivity : AppCompatActivity() {
             when {
                 TextUtils.isEmpty(email) -> {
                     Toast.makeText(
-                        this@SignupActivity,
+                        this@SignUpActivity,
                         "Пожалуйста, введите email",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
                 TextUtils.isEmpty(password) -> {
                     Toast.makeText(
-                        this@SignupActivity,
+                        this@SignUpActivity,
                         "Пожалуйста, введите пароль",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
                 else -> {
-                    firebaseAuthService.createUserWithEmailAndPassword(email, password).addOnCompleteListener() {
-                        if (it.isSuccessful) {
-                            val firebaseUser: FirebaseUser = it.result!!.user!!
-                            Toast.makeText(
-                                this@SignupActivity,
-                                "Вы зарегистрированы",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            val intent = Intent(this@SignupActivity, SigninActivity::class.java)
+                    GlobalScope.launch {
+                        val authResult: Pair<User?, Exception?> = userRepository.signUp(email, password)
+                        if (authResult.first != null) {
+                            val intent = Intent(this@SignUpActivity, SignInActivity::class.java)
                             startActivity(intent)
                             finish()
                         } else {
-                            Toast.makeText(
-                                this@SignupActivity,
-                                "Произошла ошибка регистрации",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(
+                                    this@SignUpActivity,
+                                    "Произошла ошибка регистрации: " + authResult.second?.toString(),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
                         }
                     }
                 }
@@ -63,7 +63,7 @@ class SignupActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.signup_btn_already_registered).setOnClickListener() {
-            val intent = Intent(this@SignupActivity, SigninActivity::class.java)
+            val intent = Intent(this@SignUpActivity, SignInActivity::class.java)
             startActivity(intent)
             finish()
         }

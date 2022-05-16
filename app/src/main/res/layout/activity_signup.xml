@@ -4,7 +4,7 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".SignupActivity">
+        tools:context=".SignUpActivity">
 
     <FrameLayout
             android:id="@+id/login_header_img"

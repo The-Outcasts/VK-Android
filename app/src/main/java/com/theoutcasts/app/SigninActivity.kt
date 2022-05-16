@@ -7,17 +7,20 @@ import android.text.TextUtils
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
+import com.theoutcasts.app.domain.repository.UserRepository
+import com.theoutcasts.app.repository.firebase.UserRepositoryImpl
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class SigninActivity : AppCompatActivity() {
-    private lateinit var firebaseAuthService: FirebaseAuth
+
+class SignInActivity : AppCompatActivity() {
+    private var userRepository: UserRepository = UserRepositoryImpl()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_signin)
-
-        firebaseAuthService = FirebaseAuth.getInstance()
 
         findViewById<Button>(R.id.signin_btn_login).setOnClickListener() {
             var email = findViewById<EditText>(R.id.signin_et_email).text.toString().trim()
@@ -26,33 +29,33 @@ class SigninActivity : AppCompatActivity() {
             when {
                 TextUtils.isEmpty(email) -> {
                     Toast.makeText(
-                        this@SigninActivity,
+                        this@SignInActivity,
                         "Пожалуйста, введите email",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
                 TextUtils.isEmpty(password) -> {
                     Toast.makeText(
-                        this@SigninActivity,
+                        this@SignInActivity,
                         "Пожалуйста, введите пароль",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
                 else -> {
-                    firebaseAuthService.signInWithEmailAndPassword(email, password).addOnCompleteListener() {
-                        if (it.isSuccessful) {
-                            val firebaseUser: FirebaseUser = it.result!!.user!!
-                            val intent = Intent(this@SigninActivity, MainActivity::class.java)
-                            intent.putExtra("user_id", firebaseUser.uid)
-                            intent.putExtra("email", firebaseUser.email)
+                    GlobalScope.launch(Dispatchers.IO) {
+                        val authenticatedUser = userRepository.signIn(email, password)
+                        if (authenticatedUser == null) {
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(
+                                    this@SignInActivity,
+                                    "Не удалось авторизоваться",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        } else {
+                            val intent = Intent(this@SignInActivity, MainActivity::class.java)
                             startActivity(intent)
                             finish()
-                        } else {
-                            Toast.makeText(
-                                this@SigninActivity,
-                                "Не удалось авторизоваться",
-                                Toast.LENGTH_SHORT
-                            ).show()
                         }
                     }
                 }
@@ -60,7 +63,7 @@ class SigninActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.signup_btn_already_registered).setOnClickListener() {
-            val intent = Intent(this@SigninActivity, SignupActivity::class.java)
+            val intent = Intent(this@SignInActivity, SignUpActivity::class.java)
             startActivity(intent)
             finish()
         }

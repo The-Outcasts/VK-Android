@@ -10,8 +10,9 @@ import kotlinx.coroutines.tasks.await
 import kotlin.Exception
 
 class EventRepositoryImpl(
-    private val nodeReference : DatabaseReference =
-        Firebase.database(DATABASE_CONNECTION_STRING).reference.child(NODE_NAME)
+    private val rootReference : DatabaseReference =
+        Firebase.database(DATABASE_CONNECTION_STRING).reference,
+    private val nodeReference : DatabaseReference = rootReference.child(NODE_NAME)
 ) : EventRepository {
 
     override suspend fun save(event: Event) {
@@ -75,7 +76,7 @@ class EventRepositoryImpl(
     }
 
     companion object {
-        const val TAG = "EventRepositoryImpl (Firebase)"
+        const val TAG = "Firebase.EventRepositoryImpl"
         const val NODE_NAME = "events"
         const val DATABASE_CONNECTION_STRING = "https://vk-android-efc7c-default-rtdb.europe-west1.firebasedatabase.app" // TODO: move to config
     }
