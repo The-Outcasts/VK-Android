@@ -1,4 +1,4 @@
-package com.theoutcasts.app.repository.firebase
+package com.theoutcasts.app.data.repository.firebase
 
 import android.util.Log
 import com.google.firebase.database.DatabaseReference

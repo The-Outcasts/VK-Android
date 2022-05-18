@@ -7,8 +7,9 @@ import android.text.TextUtils
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-import com.theoutcasts.app.domain.repository.UserRepository
-import com.theoutcasts.app.repository.firebase.UserRepositoryImpl
+import com.theoutcasts.app.domain.interactor.InvalidLoginOrPasswordException
+import com.theoutcasts.app.domain.interactor.UserInteractor
+import com.theoutcasts.app.data.repository.firebase.UserRepositoryImpl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -16,15 +17,15 @@ import kotlinx.coroutines.withContext
 
 
 class SignInActivity : AppCompatActivity() {
-    private var userRepository: UserRepository = UserRepositoryImpl()
+    private var userInteractor = UserInteractor(UserRepositoryImpl())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_signin)
 
         findViewById<Button>(R.id.signin_btn_login).setOnClickListener() {
-            var email = findViewById<EditText>(R.id.signin_et_email).text.toString().trim()
-            var password = findViewById<EditText>(R.id.signin_et_password).text.toString().trim()
+            val email = findViewById<EditText>(R.id.signin_et_email).text.toString().trim()
+            val password = findViewById<EditText>(R.id.signin_et_password).text.toString().trim()
 
             when {
                 TextUtils.isEmpty(email) -> {
@@ -43,20 +44,23 @@ class SignInActivity : AppCompatActivity() {
                 }
                 else -> {
                     GlobalScope.launch(Dispatchers.IO) {
-                        val authenticatedUser = userRepository.signIn(email, password)
-                        if (authenticatedUser == null) {
-                            withContext(Dispatchers.Main) {
-                                Toast.makeText(
-                                    this@SignInActivity,
-                                    "Не удалось авторизоваться",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        } else {
-                            val intent = Intent(this@SignInActivity, MainActivity::class.java)
-                            startActivity(intent)
-                            finish()
-                        }
+                        val authResult = userInteractor.signInWithEmailAndPassword(email, password)
+                        authResult.fold(
+                            onSuccess = {
+                                val intent = Intent(this@SignInActivity, MainActivity::class.java)
+                                startActivity(intent)
+                                finish()
+                            },
+                            onFailure = { e ->
+                                var errorMessage = ""
+                                if (e is InvalidLoginOrPasswordException) {
+                                    errorMessage = "Не удалось авторизоваться"
+                                }
+                                withContext(Dispatchers.Main) {
+                                    Toast.makeText(this@SignInActivity, errorMessage,Toast.LENGTH_SHORT)
+                                        .show()
+                                }
+                            })
                     }
                 }
             }
