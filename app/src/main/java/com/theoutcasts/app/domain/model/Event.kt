@@ -1,7 +1,7 @@
 package com.theoutcasts.app.domain.model
 
 data class Event(
-    var Id: String? = null,
+    var id: String? = null,
     var userId: String? = null,
     var timeCreated: String? = null,
     var pictureURL: String? = null,
