@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="text_size_categories">16sp</dimen>
+    <dimen name="margin_start_mainCategory">8dp</dimen>
+    <dimen name="margin_top_categories">5dp</dimen>
+    <dimen name="margin_bottom_categories">5dp</dimen>
+    <dimen name="margin_gap_categories">3dp</dimen>
+</resources>

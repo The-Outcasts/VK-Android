@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">TheOutcastsApp</string>
+    <string name="main_category">Все</string>
+    <string name="first_category">События</string>
+    <string name="second_category">Впечатления</string>
+    <string name="third_category">Природа</string>
+    <string name="fourth_category">Автомобили</string>
+    <string name="fifth_category">Животные</string>
+    <string name="sixth_category">Искусство</string>
+    <string name="seventh_category">Архитектура</string>
+    <string name="eighth_category">Люди</string>
 </resources>
