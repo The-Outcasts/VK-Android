@@ -1,16 +1,12 @@
 package com.theoutcasts.app
 
-import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.provider.CalendarContract.CalendarCache.URI
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import layout.CommentAdapter
 
 class PublicationActivity : AppCompatActivity() {
     private lateinit var title: String
