@@ -73,11 +73,18 @@ class PublicationActivity : AppCompatActivity() {
         GlobalScope.launch(Dispatchers.IO) {
             var eventInteractor = EventInteractor(EventRepositoryImpl())
             val result = eventInteractor.getById(eventId)
-            result.onSuccess {
-                // нужна проверка на то, что пользователь уже лайкнул(-1)
-                it.likeCount  = it.likeCount!! + 1
-            }
-            result.onFailure {  }
+            result.fold(
+                onSuccess = {
+                    // нужна проверка на то, что пользователь уже лайкнул(-1)
+                    it.likeCount  = it.likeCount!! + 1
+                    eventInteractor.save(it)
+                },
+                onFailure = {}
+            )
+
+
+
+
         }
 
     }
