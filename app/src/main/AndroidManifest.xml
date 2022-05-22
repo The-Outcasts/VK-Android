@@ -20,18 +20,18 @@
         <activity
                 android:name=".SignUpActivity"
                 android:exported="true">
-                <intent-filter>
-                    <action android:name="android.intent.action.MAIN" />
-                    <category android:name="android.intent.category.LAUNCHER" />
-                </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
         <activity
                 android:name=".SignInActivity"
-                android:exported="false" />
+                android:exported="true" />
+
         <activity
                 android:name=".MainActivity"
-                android:exported="true">
-        </activity>
+                android:exported="true"></activity>
 
         <receiver
                 android:name=".location.LocationProviderChangedReceiver"
@@ -41,7 +41,15 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
-        
+        <activity
+                android:name=".NewPublicationActivity"
+                android:exported="true"
+                android:parentActivityName=".MainActivity">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="com.theoutcasts.app.MainActivity"/>
+        </activity>
+
     </application>
 
 </manifest>
