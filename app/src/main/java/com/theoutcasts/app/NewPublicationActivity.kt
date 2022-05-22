@@ -2,6 +2,7 @@ package com.theoutcasts.app
 
 import android.app.Activity
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import androidx.appcompat.app.AppCompatActivity
@@ -28,6 +29,7 @@ class NewPublicationActivity : AppCompatActivity() {
     private val image: ImageView by lazy { findViewById(R.id.photoFromCamera) }
     private val publicationDescription: TextView by lazy { findViewById(R.id.description_text) }
     private val getResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()
+
     ) {
         if (it.resultCode == Activity.RESULT_OK) {
             val imageBitmap = it.data?.extras?.get("data") as Bitmap
@@ -55,18 +57,19 @@ class NewPublicationActivity : AppCompatActivity() {
         val publicationName = findViewById<TextView?>(R.id.post_name).text.toString()
         val publicationDescription = findViewById<TextView?>(R.id.description_text).text.toString()
         val img = image.drawToBitmap()
-        Toast.makeText(this, "publication created " + publicationName + " " + publicationDescription, Toast.LENGTH_LONG).show()
         // загрузка в БД, возврат к предыдущему экрану
+        val newEvent = Event()
+        newEvent.description = publicationDescription
+        newEvent.timeCreated = Date().toString()
+        newEvent.latitude = 1.12
+        newEvent.longitude = 1.13
+        newEvent.likeCount = 0
+        newEvent.userId = ""
         GlobalScope.launch(Dispatchers.IO) {
             val eventsManager = EventInteractor(eventRepository = EventRepositoryImpl1())
-            val newEvent = Event()
-            newEvent.description = publicationDescription
-            newEvent.timeCreated = Date().toString()
-            newEvent.latitude = 1.12
-            newEvent.longitude = 1.13
-            newEvent.likeCount = 0
-            newEvent.userId = ""
+            //eventsManager.save(newEvent)
         }
+        Toast.makeText(this, newEvent.timeCreated, Toast.LENGTH_LONG).show()
     }
 
 }
