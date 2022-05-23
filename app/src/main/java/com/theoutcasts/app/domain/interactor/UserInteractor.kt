@@ -17,8 +17,9 @@ class UserInteractor(private val userRepository: UserRepository) {
     suspend fun signInWithEmailAndPassword(email: String, password: String): Result<User> =
         userRepository.signInWithEmailAndPassword(email, password)
 
-    suspend fun signUpWithEmailAndPassword(email: String, password: String): Result<User> =
-        userRepository.signUpWithEmailAndPassword(email, password)
+    suspend fun signUpWithEmailPasswordAndUsername(email: String, password: String,
+                                                   username: String): Result<User> =
+        userRepository.signUpWithEmailPasswordAndUsername(email, password, username)
 
     suspend fun signOut() =
         userRepository.signOut()

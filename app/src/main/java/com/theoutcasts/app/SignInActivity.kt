@@ -46,8 +46,11 @@ class SignInActivity : AppCompatActivity() {
                     GlobalScope.launch(Dispatchers.IO) {
                         val authResult = userInteractor.signInWithEmailAndPassword(email, password)
                         authResult.fold(
-                            onSuccess = {
+                            onSuccess = { user ->
                                 val intent = Intent(this@SignInActivity, MainActivity::class.java)
+                                intent.putExtra("current_user_id", user.id)
+                                intent.putExtra("current_user_email", user.email)
+                                intent.putExtra("current_user_username", user.username)
                                 startActivity(intent)
                                 finish()
                             },
@@ -60,14 +63,15 @@ class SignInActivity : AppCompatActivity() {
                                     Toast.makeText(this@SignInActivity, errorMessage,Toast.LENGTH_SHORT)
                                         .show()
                                 }
-                            })
+                            }
+                        )
                     }
                 }
             }
         }
 
         findViewById<Button>(R.id.signup_btn_already_registered).setOnClickListener() {
-            val intent = Intent(this@SignInActivity, SignUpActivity::class.java)
+            val intent = Intent(this@SignInActivity, MainActivityTest::class.java)
             startActivity(intent)
             finish()
         }

@@ -26,6 +26,7 @@ class SignUpActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.signup_btn).setOnClickListener() {
             val email = findViewById<EditText>(R.id.signup_et_email).text.toString().trim()
+            val username = findViewById<EditText>(R.id.signup_et_username).text.toString().trim()
             val password = findViewById<EditText>(R.id.signup_et_password).text.toString().trim()
 
             when {
@@ -33,6 +34,13 @@ class SignUpActivity : AppCompatActivity() {
                     Toast.makeText(
                         this@SignUpActivity,
                         "Пожалуйста, введите email",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                TextUtils.isEmpty(username) -> {
+                    Toast.makeText(
+                        this@SignUpActivity,
+                        "Пожалуйста, введите имя пользователя",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
@@ -44,8 +52,8 @@ class SignUpActivity : AppCompatActivity() {
                     ).show()
                 }
                 else -> {
-                    GlobalScope.launch {
-                        val authResult = userInteractor.signUpWithEmailAndPassword(email, password)
+                    GlobalScope.launch(Dispatchers.IO) {
+                        val authResult = userInteractor.signUpWithEmailPasswordAndUsername(email, password, username)
                         authResult.fold(
                             onSuccess = {
                                 val intent = Intent(this@SignUpActivity, SignInActivity::class.java)
@@ -66,7 +74,8 @@ class SignUpActivity : AppCompatActivity() {
                                     Toast.makeText(this@SignUpActivity, errorMessage, Toast.LENGTH_SHORT)
                                         .show()
                                 }
-                        })
+                            }
+                        )
                     }
                 }
             }
