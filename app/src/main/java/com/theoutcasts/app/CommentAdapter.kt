@@ -28,6 +28,8 @@ class CommentAdapter(
     }
 
     override fun getItemCount(): Int {
+        if (comments == null)
+            return 0
         return comments.size
     }
     class CommentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
