@@ -1,5 +1,6 @@
 package com.theoutcasts.app.location
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.*
@@ -8,14 +9,16 @@ import android.view.MotionEvent
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.theoutcasts.app.MainActivity
+import com.theoutcasts.app.PublicationActivity
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.Projection
 import org.osmdroid.views.overlay.Overlay
 
-public class PublicationOverlay() : Overlay() {
+public class PublicationOverlay(context: Context, activity: Activity) : Overlay() {
 
-
+    private val con = context
+    private val act = activity
     private lateinit var mIcon:Bitmap
     private lateinit var mImage:Bitmap
     private lateinit var position:GeoPoint
@@ -70,9 +73,8 @@ public class PublicationOverlay() : Overlay() {
     }
 
     override fun onSingleTapConfirmed(e: MotionEvent?, mapView: MapView?): Boolean {
-//        val intent = Intent(MainActivity, TestActivity::class.java)
-//        intent.putExtra
-//        startActivity(intent)
+        val intent = Intent(con, PublicationActivity::class.java)
+        act.startActivity(intent)
         return super.onSingleTapConfirmed(e, mapView)
     }
 }
