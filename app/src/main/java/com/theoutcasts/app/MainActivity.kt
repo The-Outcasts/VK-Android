@@ -22,6 +22,7 @@ import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.Task
 import com.theoutcasts.app.data.repository.firebase.EventRepositoryImpl
+import com.theoutcasts.app.data.repository.firebase.ImageRepositoryImpl
 import com.theoutcasts.app.databinding.ActivityMainBinding
 import com.theoutcasts.app.domain.interactor.EventInteractor
 import com.theoutcasts.app.domain.interactor.InvalidLoginOrPasswordException
@@ -49,7 +50,7 @@ class MainActivity : AppCompatActivity() {
     private var locationRequest: LocationRequest
     private var requestingLocationUpdates = false
     private var events: List<Event> = listOfNotNull()
-
+    private var userImages: List<Bitmap> = emptyList()
     companion object {
         const val REQUEST_CHECK_SETTINGS = 20202
     }
@@ -234,18 +235,63 @@ class MainActivity : AppCompatActivity() {
 
         val publication = PublicationOverlay(this, this)
         publication.setIcon(ContextCompat.getDrawable(this,R.drawable.icon)!!.toBitmap())
-        publication.setImage(ContextCompat.getDrawable(this,R.drawable.myphoto)!!.toBitmap())
+        publication.setImage(userImages[n])
         publication.setPosition(GeoPoint(events[n].longitude!!.toDouble(),events[n].latitude!!.toDouble()))
         map.overlayManager.add(publication)
     }
 
     // Чтение Базы данных
     private fun readBD()  {
+        lateinit var image: Bitmap
         GlobalScope.launch(Dispatchers.IO) {
             val eventsResult = EventInteractor(eventRepository = EventRepositoryImpl())
             eventsResult.getAll(100).fold(
                 onSuccess = {
                     events = it
+
+                    for (idx in events.indices) {
+                        if (events[idx].pictureURL != null) {
+                            ImageRepositoryImpl().downloadImage(events[idx].pictureURL!!).fold(
+                                onSuccess = { bitmap ->
+                                    userImages += bitmap
+                                }, onFailure = { error ->
+                                    val errorMessage = "Ошибка базы медиаданных: $error"
+                                    withContext(Dispatchers.Main) {
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            errorMessage,
+                                            Toast.LENGTH_SHORT
+                                        )
+                                            .show()
+                                    }
+
+                                })
+                        }
+                    }
+
+//                    events.forEach { images ->
+//                        images.pictureURL?.let { imageURL -> ImageRepositoryImpl().downloadImage(imageURL).fold(
+//                            onSuccess = {image ->
+//                                userImages = image
+//                            },
+//
+//                            onFailure = {error ->
+//                                val errorMessage = "Ошибка базы медиаданных: $error"
+//                                withContext(Dispatchers.Main) {
+//                                    Toast.makeText(this@MainActivity, errorMessage,Toast.LENGTH_SHORT)
+//                                        .show()
+//                                }
+//                            }
+//                        ) }
+//                    }
+
+//                    for (n in events.indices)   {
+//                        userImages[n] = events[n].pictureURL?.let { imageURL ->
+//                            ImageRepositoryImpl().downloadImage(
+//                                imageURL
+//                            ).
+//                        }
+//                    }
                 },
                 onFailure = {
                     val errorMessage = "Ошибка базы данных: $it"
