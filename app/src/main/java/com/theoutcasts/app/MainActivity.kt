@@ -264,34 +264,10 @@ class MainActivity : AppCompatActivity() {
                                         )
                                             .show()
                                     }
-
                                 })
                         }
                     }
 
-//                    events.forEach { images ->
-//                        images.pictureURL?.let { imageURL -> ImageRepositoryImpl().downloadImage(imageURL).fold(
-//                            onSuccess = {image ->
-//                                userImages = image
-//                            },
-//
-//                            onFailure = {error ->
-//                                val errorMessage = "Ошибка базы медиаданных: $error"
-//                                withContext(Dispatchers.Main) {
-//                                    Toast.makeText(this@MainActivity, errorMessage,Toast.LENGTH_SHORT)
-//                                        .show()
-//                                }
-//                            }
-//                        ) }
-//                    }
-
-//                    for (n in events.indices)   {
-//                        userImages[n] = events[n].pictureURL?.let { imageURL ->
-//                            ImageRepositoryImpl().downloadImage(
-//                                imageURL
-//                            ).
-//                        }
-//                    }
                 },
                 onFailure = {
                     val errorMessage = "Ошибка базы данных: $it"
