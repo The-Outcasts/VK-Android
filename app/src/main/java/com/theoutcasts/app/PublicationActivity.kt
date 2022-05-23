@@ -31,16 +31,18 @@ class PublicationActivity : AppCompatActivity() {
     private lateinit var pictureUrl: String
     private val descriptionView: TextView by lazy {findViewById(R.id.desctiption)}
     private val descriptionTitleView: TextView by lazy {findViewById(R.id.title)}
+    private val commentCount: TextView by lazy { findViewById(R.id.commentCount) }
     lateinit var commentList: List<Comment>
-    private val eventId: String = "-N28ROCmC_IcGzcGUcyE"
+    private val eventId: String = "-N28Qa_-cM_aSyKqRe6P"
+    private val rv: RecyclerView by lazy { findViewById(R.id.comments__rv) }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_publication)
         generateCommentList()
-        val rv: RecyclerView = findViewById(R.id.comments__rv)
-        if (::commentList.isInitialized) {
-            rv.adapter = CommentAdapter(commentList)
-        }
+        //while (!::commentList.isInitialized) { sleep(10)}
+//        if (::commentList.isInitialized) {
+//            rv.adapter = CommentAdapter(commentList)
+//        }
         rv.layoutManager = LinearLayoutManager(this)
         picture.setImageResource(R.drawable.house)
 
@@ -66,23 +68,25 @@ class PublicationActivity : AppCompatActivity() {
                 imgRes.fold(
                     onSuccess = {
                             picture.setImageBitmap(it)
-                            descriptionView.text = "image"
+                        descriptionTitleView.text = "image"
                     },
                     onFailure = {
-                        descriptionView.text = it.toString() }
+                        descriptionTitleView.text = it.toString() }
                 )
             }
         }
     }
     // Список комментариев для адаптера, нужно получить из БД
     fun generateCommentList() {
-        lateinit var comList: List<Comment>
         GlobalScope.launch(Dispatchers.Main) {
             var commentInteractor = CommentInteractor(commentRepository = CommentRepositoryImpl())
             val result = commentInteractor.getByEventId(eventId)
             result.fold(
                 onSuccess = {
+                    commentList = it
                     descriptionView.text = "success"
+                    commentCount.text = it.size.toString()
+                    rv.adapter = CommentAdapter(commentList)
                     },
                 onFailure = {}
             )
