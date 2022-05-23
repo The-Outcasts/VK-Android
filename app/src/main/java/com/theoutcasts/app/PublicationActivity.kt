@@ -27,10 +27,10 @@ class PublicationActivity : AppCompatActivity() {
     private lateinit var title: String
     private lateinit var description: String
     private val likes: TextView by lazy { findViewById(R.id.likeCount) }
-    private val picture: ImageView by lazy {findViewById(R.id.publication_image)}
+    private val picture: ImageView by lazy { findViewById(R.id.publication_image) }
     private lateinit var pictureUrl: String
-    private val descriptionView: TextView by lazy {findViewById(R.id.desctiption)}
-    private val descriptionTitleView: TextView by lazy {findViewById(R.id.title)}
+    private val descriptionView: TextView by lazy { findViewById(R.id.desctiption) }
+    private val descriptionTitleView: TextView by lazy { findViewById(R.id.title) }
     private val commentCount: TextView by lazy { findViewById(R.id.commentCount) }
     lateinit var commentList: List<Comment>
     private val eventId: String = "-N28Qa_-cM_aSyKqRe6P"
@@ -45,16 +45,20 @@ class PublicationActivity : AppCompatActivity() {
 //        }
         rv.layoutManager = LinearLayoutManager(this)
         picture.setImageResource(R.drawable.house)
+        Thread {
 
-        GlobalScope.launch(Dispatchers.Main) {
+        }
+        GlobalScope.launch(Dispatchers.IO) {
             val eventInteractor = EventInteractor(EventRepositoryImpl())
             val result = eventInteractor.getById(eventId)
             result.fold(
                 onSuccess = {
                     // TODO загрузка фото по ur
-                    likes.text = "Likes:"+ it.likeCount.toString()
-                    descriptionView.text = it.description
-                    descriptionTitleView.text = it.id.toString()
+                    this@PublicationActivity.runOnUiThread {
+                        likes.text = "Likes:" + it.likeCount.toString()
+                        descriptionView.text = it.description
+                        descriptionTitleView.text = it.id.toString()
+                    }
                     pictureUrl = it.pictureURL!!
                 },
                 onFailure = {
@@ -62,32 +66,36 @@ class PublicationActivity : AppCompatActivity() {
                 }
             )
         }.invokeOnCompletion {
-            GlobalScope.launch(Dispatchers.Main) {
+            GlobalScope.launch(Dispatchers.IO) {
                 val imgInteractor = ImageInteractor(ImageRepositoryImpl())
                 val imgRes = imgInteractor.downloadImage(pictureUrl)
                 imgRes.fold(
                     onSuccess = {
+                        this@PublicationActivity.runOnUiThread {
                             picture.setImageBitmap(it)
-                        descriptionTitleView.text = "image"
+                            descriptionTitleView.text = "image"
+                        }
                     },
                     onFailure = {
-                        descriptionTitleView.text = it.toString() }
+                    }
                 )
             }
         }
     }
+
     // Список комментариев для адаптера, нужно получить из БД
     fun generateCommentList() {
-        GlobalScope.launch(Dispatchers.Main) {
+        GlobalScope.launch(Dispatchers.IO) {
             var commentInteractor = CommentInteractor(commentRepository = CommentRepositoryImpl())
             val result = commentInteractor.getByEventId(eventId)
             result.fold(
                 onSuccess = {
                     commentList = it
-                    descriptionView.text = "success"
-                    commentCount.text = it.size.toString()
-                    rv.adapter = CommentAdapter(commentList)
-                    },
+                    this@PublicationActivity.runOnUiThread {
+                        commentCount.text = it.size.toString()
+                        rv.adapter = CommentAdapter(commentList)
+                    }
+                },
                 onFailure = {}
             )
         }
@@ -100,7 +108,9 @@ class PublicationActivity : AppCompatActivity() {
             result.fold(
                 onSuccess = {
                     // нужна проверка на то, что пользователь уже лайкнул(-1)
-                    it.likeCount  = it.likeCount!! + 1
+                    this@PublicationActivity.runOnUiThread{
+                        it.likeCount = it.likeCount!! + 1
+                    }
                     eventInteractor.save(it)
                 },
                 onFailure = {}
