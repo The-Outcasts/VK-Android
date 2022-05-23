@@ -31,10 +31,7 @@ class NewPublicationActivity : AppCompatActivity() {
     private val image: ImageView by lazy { findViewById(R.id.photoFromCamera) }
     private val publicationDescription: TextView by lazy { findViewById(R.id.description_text) }
     private val newEvent = Event()
-    private val getResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()
-
-
-    ) {
+    private val getResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (it.resultCode == Activity.RESULT_OK) {
             val imageBitmap = it.data?.extras?.get("data") as Bitmap
             image.setImageBitmap(imageBitmap)
@@ -50,7 +47,7 @@ class NewPublicationActivity : AppCompatActivity() {
         try {
             getResult.launch(takePictureIntent)
         } catch (e: ActivityNotFoundException) {
-            // display error state to the user
+            Toast.makeText(this, "Could not launch camera", Toast.LENGTH_LONG)
         }
     }
     fun downloadPhoto(view: View) {
@@ -67,6 +64,8 @@ class NewPublicationActivity : AppCompatActivity() {
         newEvent.latitude = intent.getDoubleExtra("latitude", 1.1)
         newEvent.longitude = intent.getDoubleExtra("longitude", 1.1)
         newEvent.likeCount = 0
+        //TODO фото нужно загрузить в сеть, подставить url
+        newEvent.pictureURL = ""
         GlobalScope.launch(Dispatchers.IO) {
             val userManager = UserInteractor(UserRepositoryImpl())
             val result = userManager.getAuthenticatedUser()
@@ -74,9 +73,10 @@ class NewPublicationActivity : AppCompatActivity() {
                 onSuccess = {
                     newEvent.userId = it.email
                 },
-                onFailure = {}
+                onFailure = {
+                    Toast.makeText(this@NewPublicationActivity, it.toString(), Toast.LENGTH_LONG)
+                }
             )
-            //eventsManager.save(newEvent)
         }
         GlobalScope.launch(Dispatchers.IO) {
             val eventsManager = EventInteractor(eventRepository = EventRepositoryImpl1())
