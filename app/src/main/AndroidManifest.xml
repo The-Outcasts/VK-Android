@@ -49,6 +49,8 @@
                     android:name="android.support.PARENT_ACTIVITY"
                     android:value="com.theoutcasts.app.MainActivity"/>
         </activity>
+        <activity android:name=".PublicationActivity"
+            android:exported="true"/>
 
     </application>
 

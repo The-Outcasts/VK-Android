@@ -32,7 +32,7 @@ class PublicationActivity : AppCompatActivity() {
     private val descriptionView: TextView by lazy {findViewById(R.id.desctiption)}
     private val descriptionTitleView: TextView by lazy {findViewById(R.id.title)}
     lateinit var commentList: List<Comment>
-    private val eventId: String = "-N28Qa_-cM_aSyKqRe6P"
+    private val eventId: String = "-N28ROCmC_IcGzcGUcyE"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_publication)
@@ -66,8 +66,10 @@ class PublicationActivity : AppCompatActivity() {
                 imgRes.fold(
                     onSuccess = {
                             picture.setImageBitmap(it)
+                            descriptionView.text = "image"
                     },
-                    onFailure = {}
+                    onFailure = {
+                        descriptionView.text = it.toString() }
                 )
             }
         }

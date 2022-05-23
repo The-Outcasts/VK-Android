@@ -89,7 +89,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mapController: IMapController
     lateinit var pPositions:Array<GeoPoint>     //Test
 
-    private val p1:GeoPoint = GeoPoint(55.772932, 37.698825)    //Test
+    private val p1:GeoPoint = GeoPoint(55.789385, 37.792564)    //Test
     private val p2:GeoPoint = GeoPoint(52.772932, 37.698825)    //Test
     private val point: Array<GeoPoint> = arrayOf(p1,p2)                           //Test
 
@@ -217,7 +217,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun getPositionOverlay(overlayPosition: GeoPoint) { //Функция отрисовка оверлеев
 
-        val publication = PublicationOverlay()
+        val publication = PublicationOverlay(this)
         publication.setIcon(ContextCompat.getDrawable(this,R.drawable.icon)!!.toBitmap())
         publication.setImage(ContextCompat.getDrawable(this,R.drawable.ic_launcher_foreground)!!.toBitmap())
         publication.setPosition(overlayPosition)
@@ -240,7 +240,7 @@ class MainActivity : AppCompatActivity() {
     }
     */
     fun watchPublication(view: View)    {
-        val intent = Intent(this, TestActivity::class.java)
+        val intent = Intent(this, NewPublicationActivity::class.java)
         //putextra(GeoPoint)
         startActivity(intent)
     }

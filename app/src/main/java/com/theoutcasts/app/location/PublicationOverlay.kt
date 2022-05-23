@@ -3,17 +3,20 @@ package com.theoutcasts.app.location
 import android.content.Context
 import android.content.Intent
 import android.graphics.*
+import android.os.Bundle
 import android.util.Log
 import android.view.MotionEvent
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat.startActivity
 import com.theoutcasts.app.MainActivity
+import com.theoutcasts.app.PublicationActivity
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.Projection
 import org.osmdroid.views.overlay.Overlay
 
-public class PublicationOverlay() : Overlay() {
+public class PublicationOverlay(context: Context) : Overlay() {
 
 
     private lateinit var mIcon:Bitmap
@@ -25,6 +28,7 @@ public class PublicationOverlay() : Overlay() {
     private val imageHeight = 100
     private val iconWidth = 160
     private val iconHeight = 160
+    private val mainContext = context
 
 
     //private lateinit var iBackground: Bitmap
@@ -70,9 +74,10 @@ public class PublicationOverlay() : Overlay() {
     }
 
     override fun onSingleTapConfirmed(e: MotionEvent?, mapView: MapView?): Boolean {
-//        val intent = Intent(MainActivity, TestActivity::class.java)
-//        intent.putExtra
-//        startActivity(intent)
+        val intent = Intent(mainContext, PublicationActivity::class.java)
+        val bundle = Bundle()
+        intent.putExtra("eventId", "-N27ldaObFiwsu-WEiII")
+        startActivity(mainContext, intent, bundle)
         return super.onSingleTapConfirmed(e, mapView)
     }
 }
