@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity() {
     private val zoomNumber = 15 //  Initial zoom
 
     init {
-        readBD()  //Мы будем кэшировать данные из бд на итапе инициализации?
+        readBD()
         locationRequest = LocationRequest.create()
             .apply { //https://stackoverflow.com/questions/66489605/is-constructor-locationrequest-deprecated-in-google-maps-v2
                 interval = 1000 //can be much higher
