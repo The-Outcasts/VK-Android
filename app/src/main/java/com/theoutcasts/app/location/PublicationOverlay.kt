@@ -15,24 +15,28 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.Projection
 import org.osmdroid.views.overlay.Overlay
 
-public class PublicationOverlay(context: Context, activity: Activity) : Overlay() {
+public class PublicationOverlay(context: Context, activity: Activity, userID: String) : Overlay() {
+
+    val EXTRA_ALT = "LOCATION_ALTITUDE"
+    val EXTRA_LONG = "LOCATION_LONGITUDE"
+    val EXTRA_USER = "USER_ID"
+    val EXTRA_EVENT = "EVENT_ID"
 
     private val con = context
     private val act = activity
+    private val userId = userID
     private lateinit var mIcon:Bitmap
     private lateinit var mImage:Bitmap
     private lateinit var position:GeoPoint
+    private lateinit var eventID:String
+
+
     private var iconMatrix = Matrix()
     private var imageMatrix = Matrix()
     private val imageWidth = 150
     private val imageHeight = 100
     private val iconWidth = 160
     private val iconHeight = 160
-
-
-    //private lateinit var iBackground: Bitmap
-    //private val mPaint: Paint = ""
-
 
 
     fun setImage(newImage: Bitmap) {
@@ -52,6 +56,14 @@ public class PublicationOverlay(context: Context, activity: Activity) : Overlay(
 
     fun getPosition(): GeoPoint {
         return position
+    }
+
+    fun setEventId(clickedEventId: String)   {
+        eventID = clickedEventId
+    }
+
+    fun getEventId():String   {
+        return eventID
     }
 
 
@@ -74,6 +86,10 @@ public class PublicationOverlay(context: Context, activity: Activity) : Overlay(
 
     override fun onSingleTapConfirmed(e: MotionEvent?, mapView: MapView?): Boolean {
         val intent = Intent(con, PublicationActivity::class.java)
+        intent.putExtra(EXTRA_ALT,position.altitude)
+        intent.putExtra(EXTRA_LONG,position.longitude)
+        intent.putExtra(EXTRA_USER,userId)
+        intent.putExtra(EXTRA_EVENT,eventID)
         act.startActivity(intent)
         return super.onSingleTapConfirmed(e, mapView)
     }

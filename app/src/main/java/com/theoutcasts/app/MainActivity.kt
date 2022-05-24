@@ -40,6 +40,7 @@ import timber.log.Timber
 import java.io.*
 import java.util.*
 import kotlinx.coroutines.*
+import org.osmdroid.views.overlay.Marker
 
 class MainActivity : AppCompatActivity() {
 
@@ -98,6 +99,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var map: MapView
     private var startPoint: GeoPoint = GeoPoint(55.772932, 37.698825) //Москва
     private lateinit var mapController: IMapController
+    private lateinit var currentPositionMarker: Marker
 //    lateinit var pPositions:Array<GeoPoint>     //Test
 //    private val p1:GeoPoint = GeoPoint(55.772932, 37.698825)    //Test
 //    private val p2:GeoPoint = GeoPoint(52.772932, 37.698825)    //Test
@@ -145,6 +147,9 @@ class MainActivity : AppCompatActivity() {
         startPoint.latitude = newLocation.latitude
         mapController.setCenter(startPoint)
 
+        currentPositionMarker = Marker(map)
+        currentPositionMarker.position = startPoint
+        map.overlayManager.add(currentPositionMarker)
         drawPublicationOverlays(events)
         map.invalidate()
     }
@@ -233,10 +238,17 @@ class MainActivity : AppCompatActivity() {
 
     private fun getPositionOverlay(n: Int) { //Функция отрисовка оверлеев
 
-        val publication = PublicationOverlay(this, this)
+        val publication = PublicationOverlay(this, this, intent.getStringExtra(SignUpActivity.MESSAGE_USERID))
         publication.setIcon(ContextCompat.getDrawable(this,R.drawable.icon)!!.toBitmap())
         publication.setImage(userImages[n])
-        publication.setPosition(GeoPoint(events[n].longitude!!.toDouble(),events[n].latitude!!.toDouble()))
+        events[n].id?.let { publication.setEventId(it) }
+        events[n].longitude?.let {longitude ->
+            events[n].latitude?.let { latitude ->
+            GeoPoint(
+                longitude.toDouble(),
+                latitude.toDouble())
+        } }
+            ?.let { publication.setPosition(it) }
         map.overlayManager.add(publication)
     }
 
@@ -281,7 +293,6 @@ class MainActivity : AppCompatActivity() {
 
     fun watchPublication(view: View)    {
         val intent = Intent(this, PublicationActivity::class.java)
-        //putextra(event)
         startActivity(intent)
     }
 
