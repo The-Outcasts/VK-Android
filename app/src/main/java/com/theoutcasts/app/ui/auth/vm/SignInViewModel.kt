@@ -1,4 +1,4 @@
-package com.theoutcasts.app.ui.vm
+package com.theoutcasts.app.ui.auth.vm
 
 import android.content.Intent
 import android.text.TextUtils

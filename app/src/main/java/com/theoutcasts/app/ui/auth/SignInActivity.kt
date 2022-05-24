@@ -1,4 +1,4 @@
-package com.theoutcasts.app.ui
+package com.theoutcasts.app.ui.auth
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
@@ -10,13 +10,8 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.theoutcasts.app.MainActivity
 import com.theoutcasts.app.R
-import com.theoutcasts.app.data.repository.firebase.UserRepositoryImpl
-import com.theoutcasts.app.ui.vm.SignInViewModel
-import com.theoutcasts.app.ui.vm.factory.SignInViewModelFactory
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.theoutcasts.app.ui.auth.vm.SignInViewModel
+import com.theoutcasts.app.ui.auth.vm.factory.SignInViewModelFactory
 
 
 class SignInActivity : AppCompatActivity() {

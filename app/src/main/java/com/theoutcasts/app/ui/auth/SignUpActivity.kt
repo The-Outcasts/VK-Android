@@ -1,4 +1,4 @@
-package com.theoutcasts.app.ui
+package com.theoutcasts.app.ui.auth
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
@@ -10,8 +10,8 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.theoutcasts.app.MainActivity
 import com.theoutcasts.app.R
-import com.theoutcasts.app.ui.vm.SignUpViewModel
-import com.theoutcasts.app.ui.vm.factory.SignUpViewModelFactory
+import com.theoutcasts.app.ui.auth.vm.SignUpViewModel
+import com.theoutcasts.app.ui.auth.vm.factory.SignUpViewModelFactory
 
 
 class SignUpActivity : AppCompatActivity() {

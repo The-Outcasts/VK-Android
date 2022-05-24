@@ -1,4 +1,4 @@
-package com.theoutcasts.app.ui.vm
+package com.theoutcasts.app.ui.auth.vm
 
 import android.text.BoringLayout
 import android.text.TextUtils
