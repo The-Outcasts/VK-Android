@@ -237,17 +237,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getPositionOverlay(n: Int) { //Функция отрисовка оверлеев
-        val publication = PublicationOverlay(this, this, intent.getStringExtra("current_user_username")!!)
+
+        val publication = PublicationOverlay(this, this, intent.getStringExtra("current_user_id")!!)
 
         publication.setIcon(ContextCompat.getDrawable(this,R.drawable.icon)!!.toBitmap())
         publication.setImage(userImages[n])
         events[n].id?.let { publication.setEventId(it) }
         events[n].longitude?.let {longitude ->
             events[n].latitude?.let { latitude ->
-            GeoPoint(
-                longitude.toDouble(),
-                latitude.toDouble())
-        } }
+                GeoPoint(
+                    longitude.toDouble(),
+                    latitude.toDouble())
+            } }
             ?.let { publication.setPosition(it) }
         map.overlayManager.add(publication)
     }
@@ -319,5 +320,3 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
     }
 }
-
-
