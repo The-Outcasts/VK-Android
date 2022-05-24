@@ -1,5 +1,6 @@
 package com.theoutcasts.app.location
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.*
@@ -16,12 +17,21 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.Projection
 import org.osmdroid.views.overlay.Overlay
 
-public class PublicationOverlay(context: Context) : Overlay() {
+public class PublicationOverlay(context: Context, activity: Activity, userID: String) : Overlay() {
+    val EXTRA_ALT = "LOCATION_ALTITUDE"
+    val EXTRA_LONG = "LOCATION_LONGITUDE"
+    val EXTRA_USER = "USER_ID"
+    val EXTRA_EVENT = "EVENT_ID"
 
-
+    private val con = context
+    private val act = activity
+    private val userId = userID
     private lateinit var mIcon:Bitmap
     private lateinit var mImage:Bitmap
     private lateinit var position:GeoPoint
+    private lateinit var eventID:String
+
+
     private var iconMatrix = Matrix()
     private var imageMatrix = Matrix()
     private val imageWidth = 150
@@ -29,11 +39,6 @@ public class PublicationOverlay(context: Context) : Overlay() {
     private val iconWidth = 160
     private val iconHeight = 160
     private val mainContext = context
-
-
-    //private lateinit var iBackground: Bitmap
-    //private val mPaint: Paint = ""
-
 
 
     fun setImage(newImage: Bitmap) {
@@ -55,6 +60,14 @@ public class PublicationOverlay(context: Context) : Overlay() {
         return position
     }
 
+    fun setEventId(clickedEventId: String)   {
+        eventID = clickedEventId
+    }
+
+    fun getEventId():String   {
+        return eventID
+    }
+
 
     override fun draw(pCanvas: Canvas, pProjection: Projection)  {
         computeMatrix(pProjection)
@@ -74,10 +87,12 @@ public class PublicationOverlay(context: Context) : Overlay() {
     }
 
     override fun onSingleTapConfirmed(e: MotionEvent?, mapView: MapView?): Boolean {
-        val intent = Intent(mainContext, PublicationActivity::class.java)
-        val bundle = Bundle()
-        intent.putExtra("eventId", "-N27ldaObFiwsu-WEiII")
-        startActivity(mainContext, intent, bundle)
+        val intent = Intent(con, PublicationActivity::class.java)
+        intent.putExtra(EXTRA_ALT,position.altitude)
+        intent.putExtra(EXTRA_LONG,position.longitude)
+        intent.putExtra(EXTRA_USER,userId)
+        intent.putExtra(EXTRA_EVENT,eventID)
+        act.startActivity(intent)
         return super.onSingleTapConfirmed(e, mapView)
     }
 }

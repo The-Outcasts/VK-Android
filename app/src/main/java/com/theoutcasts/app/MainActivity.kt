@@ -9,7 +9,9 @@ import android.location.LocationManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Looper
+import android.provider.CalendarContract
 import android.view.View
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -19,7 +21,13 @@ import org.osmdroid.api.IMapController
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.Task
+import com.theoutcasts.app.data.repository.firebase.EventRepositoryImpl
+import com.theoutcasts.app.data.repository.firebase.ImageRepositoryImpl
 import com.theoutcasts.app.databinding.ActivityMainBinding
+import com.theoutcasts.app.domain.interactor.EventInteractor
+import com.theoutcasts.app.domain.interactor.InvalidLoginOrPasswordException
+import com.theoutcasts.app.domain.model.Event
+import com.theoutcasts.app.domain.repository.EventRepository
 import com.theoutcasts.app.location.LocationProviderChangedReceiver
 import com.theoutcasts.app.location.MyEventLocationSettingsChange
 import com.theoutcasts.app.location.PublicationOverlay
@@ -31,6 +39,8 @@ import org.osmdroid.views.MapView
 import timber.log.Timber
 import java.io.*
 import java.util.*
+import kotlinx.coroutines.*
+import org.osmdroid.views.overlay.Marker
 
 class MainActivity : AppCompatActivity() {
 
@@ -40,7 +50,8 @@ class MainActivity : AppCompatActivity() {
     private var locationCallback: LocationCallback
     private var locationRequest: LocationRequest
     private var requestingLocationUpdates = false
-
+    private var events: List<Event> = listOfNotNull()
+    private var userImages: List<Bitmap> = emptyList()
     companion object {
         const val REQUEST_CHECK_SETTINGS = 20202
     }
@@ -48,6 +59,7 @@ class MainActivity : AppCompatActivity() {
     private val zoomNumber = 15 //  Initial zoom
 
     init {
+        readBD()
         locationRequest = LocationRequest.create()
             .apply { //https://stackoverflow.com/questions/66489605/is-constructor-locationrequest-deprecated-in-google-maps-v2
                 interval = 1000 //can be much higher
@@ -60,7 +72,7 @@ class MainActivity : AppCompatActivity() {
             override fun onLocationResult(locationResult: LocationResult) {
                 for (location in locationResult.locations) {
                     // Update UI with location data
-                    updateLocation(location,pPositions) //MY function
+                    updateLocation(location) //MY function
                 }
             }
         }
@@ -79,7 +91,7 @@ class MainActivity : AppCompatActivity() {
                 //initMap() if settings are ok
             }
         }
-        //readDB()  //Мы будем кэшировать данные из бд на итапе инициализации?
+
 
     }
 
@@ -87,11 +99,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var map: MapView
     private var startPoint: GeoPoint = GeoPoint(55.772932, 37.698825) //Москва
     private lateinit var mapController: IMapController
-    lateinit var pPositions:Array<GeoPoint>     //Test
-
-    private val p1:GeoPoint = GeoPoint(55.789385, 37.792564)    //Test
-    private val p2:GeoPoint = GeoPoint(52.772932, 37.698825)    //Test
-    private val point: Array<GeoPoint> = arrayOf(p1,p2)                           //Test
+    private lateinit var currentPositionMarker: Marker
+//    lateinit var pPositions:Array<GeoPoint>     //Test
+//    private val p1:GeoPoint = GeoPoint(55.772932, 37.698825)    //Test
+//    private val p2:GeoPoint = GeoPoint(52.772932, 37.698825)    //Test
+//    private val point: Array<GeoPoint> = arrayOf(p1,p2)                           //Test
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -108,7 +120,7 @@ class MainActivity : AppCompatActivity() {
             .load(applicationContext, this.getPreferences(Context.MODE_PRIVATE))
         binding = ActivityMainBinding.inflate(layoutInflater) //ADD THIS LINE
 
-        pPositions = point  //Тест
+//        pPositions = point  //Тест
 
         map = binding.map
         map.setTileSource(TileSourceFactory.MAPNIK)
@@ -127,7 +139,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun updateLocation(newLocation: Location, overlayPositions: Array<GeoPoint>) {
+    fun updateLocation(newLocation: Location) {
         lastLocation = newLocation
         //GUI, MAP TODO
         //var currentPoint: GeoPoint = GeoPoint(newLocation.latitude, newLocation.longitude);
@@ -135,9 +147,17 @@ class MainActivity : AppCompatActivity() {
         startPoint.latitude = newLocation.latitude
         mapController.setCenter(startPoint)
 
-        for (n in overlayPositions.indices) {       //Цикл отрисовки оверлеев
+        currentPositionMarker = Marker(map)
+        currentPositionMarker.position = startPoint
+        map.overlayManager.add(currentPositionMarker)
+        drawPublicationOverlays(events)
+        map.invalidate()
+    }
 
-            getPositionOverlay(overlayPositions[n])
+    private fun drawPublicationOverlays(events: List<Event>)    {
+        for (n in events.indices) {       //Цикл отрисовки оверлеев
+
+            getPositionOverlay(n)
         }
         map.invalidate()
     }
@@ -181,7 +201,8 @@ class MainActivity : AppCompatActivity() {
     fun readLastKnownLocation() {
         fusedLocationClient.lastLocation
             .addOnSuccessListener { location: Location? ->
-                location?.let { updateLocation(it,pPositions) }
+                location?.let {
+                    updateLocation(it) }
             }
     }
 
@@ -215,34 +236,87 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun getPositionOverlay(overlayPosition: GeoPoint) { //Функция отрисовка оверлеев
+    private fun getPositionOverlay(n: Int) { //Функция отрисовка оверлеев
+        val publication = PublicationOverlay(this, this, intent.getStringExtra("signed_user_id")!!)
 
-        val publication = PublicationOverlay(this)
         publication.setIcon(ContextCompat.getDrawable(this,R.drawable.icon)!!.toBitmap())
-        publication.setImage(ContextCompat.getDrawable(this,R.drawable.ic_launcher_foreground)!!.toBitmap())
-        publication.setPosition(overlayPosition)
+        publication.setImage(userImages[n])
+        events[n].id?.let { publication.setEventId(it) }
+        events[n].longitude?.let {longitude ->
+            events[n].latitude?.let { latitude ->
+            GeoPoint(
+                longitude.toDouble(),
+                latitude.toDouble())
+        } }
+            ?.let { publication.setPosition(it) }
         map.overlayManager.add(publication)
     }
 
-    /* Чтение КЭШа
-    private fun readCache()  {
-        var i = 0
-        val brPoints: InputStream = File("GeoPoints.txt").inputStream()
+    // Чтение Базы данных
+    private fun readBD()  {
+        lateinit var image: Bitmap
+        GlobalScope.launch(Dispatchers.IO) {
+            val eventsResult = EventInteractor(eventRepository = EventRepositoryImpl())
+            eventsResult.getAll(100).fold(
+                onSuccess = {
+                    events = it
 
-          brPoints.bufferedReader().useLines  {lines -> lines.forEach {
-            i++
-            pPositions[i].altitude = it.toDouble()
-            pPositions[i].longitude = it.toDouble()
-        }}
+                    for (idx in events.indices) {
+                        if (events[idx].pictureURL != null) {
+                            ImageRepositoryImpl().downloadImage(events[idx].pictureURL!!).fold(
+                                onSuccess = { bitmap ->
+                                    userImages += bitmap
+                                }, onFailure = { error ->
+                                    val errorMessage = "Ошибка базы медиаданных: $error"
+                                    withContext(Dispatchers.Main) {
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            errorMessage,
+                                            Toast.LENGTH_SHORT
+                                        )
+                                            .show()
+                                    }
+                                })
+                        }
+                    }
 
-        //val brPoints = BufferedReader(InputStreamReader(openFileInput("GeoPoints")))
-        //val brPhotos = BufferedReader(InputStreamReader(openFileInput("Photos")))
+                },
+                onFailure = {
+                    val errorMessage = "Ошибка базы данных: $it"
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@MainActivity, errorMessage,Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                })
+        }
     }
-    */
+
     fun watchPublication(view: View)    {
-        val intent = Intent(this, NewPublicationActivity::class.java)
-        //putextra(GeoPoint)
+        val intent = Intent(this, PublicationActivity::class.java)
         startActivity(intent)
+    }
+
+    override fun onStart() {
+        super.onStart()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        initLocation()
+        startLocationUpdates()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        stopLocationUpdates()
+    }
+
+    override fun onStop() {
+        super.onStop()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
     }
 }
 

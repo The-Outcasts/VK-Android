@@ -32,7 +32,9 @@
                 android:name=".MainActivity"
                 android:exported="true">
         </activity>
-
+        <activity android:name=".PublicationActivity"
+                android:exported="false"
+                android:parentActivityName=".MainActivity"/>
         <receiver
                 android:name=".location.LocationProviderChangedReceiver"
                 android:exported="false">
@@ -45,13 +47,6 @@
                 android:name=".NewPublicationActivity"
                 android:exported="true"
                 android:parentActivityName=".MainActivity">
-            <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value="com.theoutcasts.app.MainActivity"/>
-        </activity>
-        <activity android:name=".PublicationActivity"
-            android:exported="true">
-            android:parentActivityName=".MainActivity">
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
                     android:value="com.theoutcasts.app.MainActivity"/>
