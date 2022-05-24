@@ -24,12 +24,10 @@ class CommentAdapter(
     }
 
     override fun onBindViewHolder(holder: CommentViewHolder, position: Int) {
-        holder.bind(comments[position])
+        holder.bind(comments!![position])
     }
 
     override fun getItemCount(): Int {
-        if (comments == null)
-            return 0
         return comments.size
     }
     class CommentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

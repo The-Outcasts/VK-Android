@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.Settings
 import android.view.View
+import android.widget.Adapter
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -32,21 +33,18 @@ class PublicationActivity : AppCompatActivity() {
     private val descriptionView: TextView by lazy { findViewById(R.id.desctiption) }
     private val descriptionTitleView: TextView by lazy { findViewById(R.id.title) }
     private val commentCount: TextView by lazy { findViewById(R.id.commentCount) }
-    lateinit var commentList: List<Comment>
-    private var eventId = intent.getStringExtra("eventId")
+    private var commentList = mutableListOf<Comment>()
+    private var eventId: String = "null"//intent.getStringExtra("eventId")
 
     private val rv: RecyclerView by lazy { findViewById(R.id.comments__rv) }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (eventId == null) {
-            eventId = "-N2k_Yt4M_Z1-AJHpQIS"
+        if (eventId == "null") {
+            eventId = "-N28Qa_-cM_aSyKqRe6P"
         }
         setContentView(R.layout.activity_publication)
         generateCommentList()
-        //while (!::commentList.isInitialized) { sleep(10)}
-//        if (::commentList.isInitialized) {
-//            rv.adapter = CommentAdapter(commentList)
-//        }
+        rv.adapter = CommentAdapter(commentList)
         rv.layoutManager = LinearLayoutManager(this)
         picture.setImageResource(R.drawable.house)
         Thread {
@@ -90,13 +88,13 @@ class PublicationActivity : AppCompatActivity() {
     fun generateCommentList() {
         GlobalScope.launch(Dispatchers.IO) {
             var commentInteractor = CommentInteractor(commentRepository = CommentRepositoryImpl())
-            val result = commentInteractor.getByEventId(eventId!!)
+            val result = commentInteractor.getByEventId(eventId)
             result.fold(
                 onSuccess = {
-                    commentList = it
+                    commentList.addAll(it)
                     this@PublicationActivity.runOnUiThread {
-                        commentCount.text = it.size.toString()
-                        rv.adapter = CommentAdapter(commentList)
+                        rv.adapter!!.notifyItemInserted(it.size)
+                        commentCount.text = "Comments: " + it.size.toString()
                     }
                 },
                 onFailure = {}
