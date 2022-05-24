@@ -8,6 +8,17 @@ class CommentInteractor(private val commentRepository: CommentRepository) {
     suspend fun delete(comment: Comment): Result<Comment> = commentRepository.delete(comment)
     suspend fun getById(id: String): Result<Comment> = commentRepository.getById(id)
 
-    suspend fun getByEventId(eventId: String): Result<List<Comment>> =
-        commentRepository.getByEventId(eventId)
+    suspend fun getByEventId(eventId: String): Result<List<Comment>> {
+        val commentsResult = commentRepository.getByEventId(eventId)
+
+        commentsResult.fold(
+            onSuccess = { comments ->
+                val sortedComments = comments.sortedBy { it.timestamp }
+                return Result.success(sortedComments)
+            },
+            onFailure = {
+                return commentsResult
+            }
+        )
+    }
 }

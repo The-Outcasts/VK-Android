@@ -18,7 +18,7 @@
             android:theme="@style/Theme.TheOutcastsApp">
 
         <activity
-                android:name=".SignUpActivity"
+                android:name=".ui.SignUpActivity"
                 android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,12 +26,12 @@
             </intent-filter>
         </activity>
         <activity
-                android:name=".SignInActivity"
-                android:exported="true" />
-
+                android:name=".ui.SignInActivity"
+                android:exported="false" />
         <activity
                 android:name=".MainActivity"
-                android:exported="true"></activity>
+                android:exported="true">
+        </activity>
 
         <receiver
                 android:name=".location.LocationProviderChangedReceiver"
