@@ -34,7 +34,7 @@ class CommentAdapter(
         val author: TextView = itemView.findViewById(R.id.author)
         val comment: TextView = itemView.findViewById(R.id.comment_text)
         fun bind(com: Comment) {
-            (com.userId + ":").also { author.text = it }
+            (com.username + ":").also { author.text = it }
             comment.text = com.content
         }
     }

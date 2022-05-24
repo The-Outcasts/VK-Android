@@ -119,4 +119,8 @@ class PublicationActivity : AppCompatActivity() {
         }
 
     }
+
+    fun sendComment(view: View) {
+
+    }
 }
