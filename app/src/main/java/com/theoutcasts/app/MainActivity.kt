@@ -237,7 +237,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getPositionOverlay(n: Int) { //Функция отрисовка оверлеев
-        val publication = PublicationOverlay(this, this, intent.getStringExtra("signed_user_id")!!)
+        val publication = PublicationOverlay(this, this, intent.getStringExtra("current_user_username")!!)
 
         publication.setIcon(ContextCompat.getDrawable(this,R.drawable.icon)!!.toBitmap())
         publication.setImage(userImages[n])
