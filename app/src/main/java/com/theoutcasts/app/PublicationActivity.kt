@@ -33,10 +33,14 @@ class PublicationActivity : AppCompatActivity() {
     private val descriptionTitleView: TextView by lazy { findViewById(R.id.title) }
     private val commentCount: TextView by lazy { findViewById(R.id.commentCount) }
     lateinit var commentList: List<Comment>
-    private val eventId: String = "-N28Qa_-cM_aSyKqRe6P"
+    private var eventId = intent.getStringExtra("eventId")
+
     private val rv: RecyclerView by lazy { findViewById(R.id.comments__rv) }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (eventId == null) {
+            eventId = "-N2k_Yt4M_Z1-AJHpQIS"
+        }
         setContentView(R.layout.activity_publication)
         generateCommentList()
         //while (!::commentList.isInitialized) { sleep(10)}
@@ -50,10 +54,9 @@ class PublicationActivity : AppCompatActivity() {
         }
         GlobalScope.launch(Dispatchers.IO) {
             val eventInteractor = EventInteractor(EventRepositoryImpl())
-            val result = eventInteractor.getById(eventId)
+            val result = eventInteractor.getById(eventId!!)
             result.fold(
                 onSuccess = {
-                    // TODO загрузка фото по ur
                     this@PublicationActivity.runOnUiThread {
                         likes.text = "Likes:" + it.likeCount.toString()
                         descriptionView.text = it.description
@@ -87,7 +90,7 @@ class PublicationActivity : AppCompatActivity() {
     fun generateCommentList() {
         GlobalScope.launch(Dispatchers.IO) {
             var commentInteractor = CommentInteractor(commentRepository = CommentRepositoryImpl())
-            val result = commentInteractor.getByEventId(eventId)
+            val result = commentInteractor.getByEventId(eventId!!)
             result.fold(
                 onSuccess = {
                     commentList = it
@@ -104,7 +107,7 @@ class PublicationActivity : AppCompatActivity() {
     fun setLike(view: View) {
         GlobalScope.launch(Dispatchers.IO) {
             var eventInteractor = EventInteractor(EventRepositoryImpl())
-            val result = eventInteractor.getById(eventId)
+            val result = eventInteractor.getById(eventId!!)
             result.fold(
                 onSuccess = {
                     // нужна проверка на то, что пользователь уже лайкнул(-1)
