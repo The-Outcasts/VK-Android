@@ -50,8 +50,8 @@ class SignInActivity : AppCompatActivity() {
             vm.signInWithEmailAndPassword(email, password)
         }
 
-        findViewById<Button>(R.id.signup_btn_already_registered).setOnClickListener() {
-            val intent = Intent(this@SignInActivity, MainActivity::class.java)
+        findViewById<Button>(R.id.signin_btn_register).setOnClickListener() {
+            val intent = Intent(this@SignInActivity, SignUpActivity::class.java)
             startActivity(intent)
             finish()
         }
