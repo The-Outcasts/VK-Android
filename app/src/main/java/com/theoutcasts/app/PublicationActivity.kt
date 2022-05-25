@@ -4,10 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.Settings
 import android.view.View
-import android.widget.Adapter
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.theoutcasts.app.data.repository.firebase.CommentRepositoryImpl
@@ -24,6 +21,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.lang.Thread.sleep
+import java.text.SimpleDateFormat
+import java.util.*
 
 class PublicationActivity : AppCompatActivity() {
     private lateinit var title: String
@@ -44,6 +43,7 @@ class PublicationActivity : AppCompatActivity() {
         eventId = intent.getStringExtra(PublicationOverlay.EXTRA_EVENT)!!
 
         if (eventId == "null") {
+            Toast.makeText(this, "null eventId", Toast.LENGTH_LONG)
             eventId = "-N28Qa_-cM_aSyKqRe6P"
         }
         setContentView(R.layout.activity_publication)
@@ -95,7 +95,7 @@ class PublicationActivity : AppCompatActivity() {
                 onSuccess = {
                     commentList.addAll(it)
                     this@PublicationActivity.runOnUiThread {
-                        rv.adapter!!.notifyItemInserted(it.size)
+                        rv.adapter!!.notifyItemRangeInserted(0, it.size)
                         commentCount.text = "Comments: " + it.size.toString()
                     }
                 },
@@ -123,6 +123,26 @@ class PublicationActivity : AppCompatActivity() {
     }
 
     fun sendComment(view: View) {
-
+        val comment = Comment()
+        comment.userId = intent.getStringExtra(PublicationOverlay.EXTRA_USER)
+        comment.eventId = eventId
+        comment.content = findViewById<EditText>(R.id.user_comment).text.toString()
+        comment.timestamp = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.CANADA)
+            .format(Date())
+            .toString()
+        comment.username = null
+        GlobalScope.launch(Dispatchers.IO) {
+            val commentInteractor = CommentInteractor(CommentRepositoryImpl())
+            val res = commentInteractor.save(comment)
+            res.fold(
+                onSuccess = {
+                    commentList.add(comment)
+                            this@PublicationActivity.runOnUiThread {
+                                rv.adapter!!.notifyItemInserted(commentList.size - 1)
+                            }
+                },
+                onFailure = {}
+            )
+        }
     }
 }
