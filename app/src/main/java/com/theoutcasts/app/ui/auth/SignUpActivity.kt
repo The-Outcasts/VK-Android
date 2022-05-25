@@ -42,10 +42,10 @@ class SignUpActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.signup_btn).setOnClickListener() {
             val email = emailEditText.text.toString().trim()
-            val username = usernameEditText.text.toString().trim()
             val password = passwordEditText.text.toString().trim()
+            val username = usernameEditText.text.toString().trim()
 
-            vm.signUpWithEmailPasswordAndUsername(email, username, password)
+            vm.signUpWithEmailPasswordAndUsername(email, password, username)
         }
 
         findViewById<Button>(R.id.signup_btn_already_registered).setOnClickListener() {
