@@ -8,7 +8,6 @@ import android.location.LocationManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Looper
-import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -163,13 +162,13 @@ class MainActivity : AppCompatActivity() {
     private fun drawPublicationOverlays() {
         vm.events.value ?.let {
             for (event in it) {
-                drawTest(event)
+                drawPublicationOverlay(event)
             }
         }
         map.invalidate()
     }
 
-    private fun drawTest(eventUi: EventUi) {
+    private fun drawPublicationOverlay(eventUi: EventUi) {
         val notLoadedPictureBitmap = ContextCompat.getDrawable(this,R.drawable.logo_black)!!.toBitmap()
 
         val publication = PublicationOverlay(
