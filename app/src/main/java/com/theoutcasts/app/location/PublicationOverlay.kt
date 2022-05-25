@@ -17,11 +17,13 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.Projection
 import org.osmdroid.views.overlay.Overlay
 
-public class PublicationOverlay(context: Context, activity: Activity, userID: String) : Overlay() {
-    val EXTRA_ALT = "LOCATION_ALTITUDE"
-    val EXTRA_LONG = "LOCATION_LONGITUDE"
-    val EXTRA_USER = "USER_ID"
-    val EXTRA_EVENT = "EVENT_ID"
+class PublicationOverlay(context: Context, activity: Activity, userID: String) : Overlay() {
+    companion object {
+        const val EXTRA_ALT = "LOCATION_ALTITUDE"
+        const val EXTRA_LONG = "LOCATION_LONGITUDE"
+        const val EXTRA_USER = "USER_ID"
+        const val EXTRA_EVENT = "EVENT_ID"
+    }
 
     private val con = context
     private val act = activity

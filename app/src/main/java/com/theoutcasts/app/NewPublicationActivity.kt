@@ -24,6 +24,7 @@ import com.theoutcasts.app.domain.model.Event
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 import kotlin.concurrent.timer
 import com.theoutcasts.app.data.repository.firebase.EventRepositoryImpl as EventRepositoryImpl1
@@ -75,10 +76,12 @@ class NewPublicationActivity : AppCompatActivity() {
             val result = userManager.getAuthenticatedUser()
             result.fold(
                 onSuccess = {
-                    newEvent.userId = it.id
+                    withContext(Dispatchers.Main) { newEvent.userId = it.id }
                 },
                 onFailure = {
-                    Toast.makeText(this@NewPublicationActivity, it.toString(), Toast.LENGTH_LONG)
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@NewPublicationActivity, it.toString(), Toast.LENGTH_LONG)
+                    }
                 }
             )
         }.invokeOnCompletion {

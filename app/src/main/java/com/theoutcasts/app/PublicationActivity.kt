@@ -19,6 +19,7 @@ import com.theoutcasts.app.domain.interactor.EventInteractor
 import com.theoutcasts.app.domain.interactor.ImageInteractor
 import com.theoutcasts.app.domain.interactor.UserInteractor
 import com.theoutcasts.app.domain.model.Comment
+import com.theoutcasts.app.location.PublicationOverlay
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -34,11 +35,14 @@ class PublicationActivity : AppCompatActivity() {
     private val descriptionTitleView: TextView by lazy { findViewById(R.id.title) }
     private val commentCount: TextView by lazy { findViewById(R.id.commentCount) }
     private var commentList = mutableListOf<Comment>()
-    private var eventId: String = "null"//intent.getStringExtra("eventId")
+    private lateinit var eventId: String
 
     private val rv: RecyclerView by lazy { findViewById(R.id.comments__rv) }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        eventId = intent.getStringExtra(PublicationOverlay.EXTRA_EVENT)!!
+
         if (eventId == "null") {
             eventId = "-N28Qa_-cM_aSyKqRe6P"
         }
@@ -47,9 +51,7 @@ class PublicationActivity : AppCompatActivity() {
         rv.adapter = CommentAdapter(commentList)
         rv.layoutManager = LinearLayoutManager(this)
         picture.setImageResource(R.drawable.house)
-        Thread {
 
-        }
         GlobalScope.launch(Dispatchers.IO) {
             val eventInteractor = EventInteractor(EventRepositoryImpl())
             val result = eventInteractor.getById(eventId!!)

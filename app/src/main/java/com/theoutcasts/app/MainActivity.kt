@@ -3,46 +3,38 @@ package com.theoutcasts.app
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.*
-import android.graphics.Bitmap
 import android.location.Location
 import android.location.LocationManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Looper
-import android.provider.CalendarContract
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.lifecycle.ViewModelProvider
 import org.osmdroid.api.IMapController
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.Task
-import com.theoutcasts.app.data.repository.firebase.EventRepositoryImpl
-import com.theoutcasts.app.data.repository.firebase.ImageRepositoryImpl
 import com.theoutcasts.app.databinding.ActivityMainBinding
-import com.theoutcasts.app.domain.interactor.EventInteractor
-import com.theoutcasts.app.domain.interactor.InvalidLoginOrPasswordException
-import com.theoutcasts.app.domain.model.Event
-import com.theoutcasts.app.domain.repository.EventRepository
 import com.theoutcasts.app.location.LocationProviderChangedReceiver
 import com.theoutcasts.app.location.MyEventLocationSettingsChange
 import com.theoutcasts.app.location.PublicationOverlay
-import com.theoutcasts.app.location.TestActivity
+import com.theoutcasts.app.ui.map.model.EventUi
+import com.theoutcasts.app.ui.map.vm.MapViewModel
+import com.theoutcasts.app.ui.map.vm.MapViewModelFactory
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import timber.log.Timber
-import java.io.*
-import java.util.*
-import kotlinx.coroutines.*
 import org.osmdroid.views.overlay.Marker
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var vm: MapViewModel
 
     private var activityResultLauncher: ActivityResultLauncher<Array<String>>
     private lateinit var fusedLocationClient: FusedLocationProviderClient //https://developer.android.com/training/location/retrieve-current
@@ -50,8 +42,7 @@ class MainActivity : AppCompatActivity() {
     private var locationCallback: LocationCallback
     private var locationRequest: LocationRequest
     private var requestingLocationUpdates = false
-    private var events: List<Event> = listOfNotNull()
-    private var userImages: List<Bitmap> = emptyList()
+
     companion object {
         const val REQUEST_CHECK_SETTINGS = 20202
     }
@@ -59,7 +50,6 @@ class MainActivity : AppCompatActivity() {
     private val zoomNumber = 15 //  Initial zoom
 
     init {
-        readBD()
         locationRequest = LocationRequest.create()
             .apply { //https://stackoverflow.com/questions/66489605/is-constructor-locationrequest-deprecated-in-google-maps-v2
                 interval = 1000 //can be much higher
@@ -100,12 +90,21 @@ class MainActivity : AppCompatActivity() {
     private var startPoint: GeoPoint = GeoPoint(55.772932, 37.698825) //Москва
     private lateinit var mapController: IMapController
     private lateinit var currentPositionMarker: Marker
-//    lateinit var pPositions:Array<GeoPoint>     //Test
-//    private val p1:GeoPoint = GeoPoint(55.772932, 37.698825)    //Test
-//    private val p2:GeoPoint = GeoPoint(52.772932, 37.698825)    //Test
-//    private val point: Array<GeoPoint> = arrayOf(p1,p2)                           //Test
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        vm = ViewModelProvider(this, MapViewModelFactory())[MapViewModel::class.java]
+
+        vm.errorMessage.observe(this) {
+            Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+        }
+
+        vm.user.observe(this) {
+            Toast.makeText(this, it.username, Toast.LENGTH_SHORT).show()
+        }
+
+        vm.events.observe(this) {
+            drawPublicationOverlays()
+        }
 
         super.onCreate(savedInstanceState)
         if (BuildConfig.DEBUG) {
@@ -119,8 +118,6 @@ class MainActivity : AppCompatActivity() {
         Configuration.getInstance()
             .load(applicationContext, this.getPreferences(Context.MODE_PRIVATE))
         binding = ActivityMainBinding.inflate(layoutInflater) //ADD THIS LINE
-
-//        pPositions = point  //Тест
 
         map = binding.map
         map.setTileSource(TileSourceFactory.MAPNIK)
@@ -137,6 +134,15 @@ class MainActivity : AppCompatActivity() {
 
         activityResultLauncher.launch(appPerms)
 
+        binding.addPublicationButton.setOnClickListener {
+            val intent = Intent(this, NewPublicationActivity::class.java)
+            intent.putExtra("latitude", startPoint.latitude)
+            intent.putExtra("longtitude", startPoint.longitude)
+            startActivity(intent)
+        }
+
+        vm.loadUser()
+        vm.loadEvents()
     }
 
     fun updateLocation(newLocation: Location) {
@@ -150,16 +156,38 @@ class MainActivity : AppCompatActivity() {
         currentPositionMarker = Marker(map)
         currentPositionMarker.position = startPoint
         map.overlayManager.add(currentPositionMarker)
-        drawPublicationOverlays(events)
+        drawPublicationOverlays()
         map.invalidate()
     }
 
-    private fun drawPublicationOverlays(events: List<Event>)    {
-        for (n in events.indices) {       //Цикл отрисовки оверлеев
-
-            getPositionOverlay(n)
+    private fun drawPublicationOverlays() {
+        vm.events.value ?.let {
+            for (event in it) {
+                drawTest(event)
+            }
         }
         map.invalidate()
+    }
+
+    private fun drawTest(eventUi: EventUi) {
+        val notLoadedPictureBitmap = ContextCompat.getDrawable(this,R.drawable.logo_black)!!.toBitmap()
+
+        val publication = PublicationOverlay(
+            this, this,
+            vm.user.value!!.id
+        )
+
+        publication.setEventId(eventUi.domain.id!!)
+        publication.setPosition(GeoPoint(eventUi.domain.longitude!!, eventUi.domain.latitude!!))
+        publication.setIcon(ContextCompat.getDrawable(this,R.drawable.icon)!!.toBitmap())
+
+        if (eventUi.pictureBitmap == null) {
+            publication.setImage(notLoadedPictureBitmap)
+        } else {
+            publication.setImage(eventUi.pictureBitmap!!)
+        }
+
+        map.overlayManager.add(publication)
     }
 
     private fun initCheckLocationSettings() {
@@ -234,62 +262,6 @@ class MainActivity : AppCompatActivity() {
         mapController.setCenter(startPoint)
         map.invalidate()
 
-    }
-
-    private fun getPositionOverlay(n: Int) { //Функция отрисовка оверлеев
-
-        val publication = PublicationOverlay(this, this, intent.getStringExtra("current_user_id")!!)
-
-        publication.setIcon(ContextCompat.getDrawable(this,R.drawable.icon)!!.toBitmap())
-        publication.setImage(userImages[n])
-        events[n].id?.let { publication.setEventId(it) }
-        events[n].longitude?.let {longitude ->
-            events[n].latitude?.let { latitude ->
-                GeoPoint(
-                    longitude.toDouble(),
-                    latitude.toDouble())
-            } }
-            ?.let { publication.setPosition(it) }
-        map.overlayManager.add(publication)
-    }
-
-    // Чтение Базы данных
-    private fun readBD()  {
-        lateinit var image: Bitmap
-        GlobalScope.launch(Dispatchers.IO) {
-            val eventsResult = EventInteractor(eventRepository = EventRepositoryImpl())
-            eventsResult.getAll(100).fold(
-                onSuccess = {
-                    events = it
-
-                    for (idx in events.indices) {
-                        if (events[idx].pictureURL != null) {
-                            ImageRepositoryImpl().downloadImage(events[idx].pictureURL!!).fold(
-                                onSuccess = { bitmap ->
-                                    userImages += bitmap
-                                }, onFailure = { error ->
-                                    val errorMessage = "Ошибка базы медиаданных: $error"
-                                    withContext(Dispatchers.Main) {
-                                        Toast.makeText(
-                                            this@MainActivity,
-                                            errorMessage,
-                                            Toast.LENGTH_SHORT
-                                        )
-                                            .show()
-                                    }
-                                })
-                        }
-                    }
-
-                },
-                onFailure = {
-                    val errorMessage = "Ошибка базы данных: $it"
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(this@MainActivity, errorMessage,Toast.LENGTH_SHORT)
-                            .show()
-                    }
-                })
-        }
     }
 
     fun watchPublication(view: View)    {
