@@ -62,8 +62,16 @@ class MapViewModel(
                     // load pictures for events
                     for (eventUi in eventUiList) {
                         imageInteractor.downloadImage(eventUi.domain.pictureURL!!).fold(
-                            onSuccess = { eventUi.pictureBitmap = it },
-                            onFailure = { errorMessageLiveData.value = "Ошибка: ${it.toString()}" }
+                            onSuccess = {
+                                withContext(Dispatchers.Main) {
+                                    eventUi.pictureBitmap = it
+                                }
+                            },
+                            onFailure = {
+                                withContext(Dispatchers.Main) {
+                                    errorMessageLiveData.value = "Ошибка: ${it.toString()}"
+                                }
+                            }
                         )
                     }
 
@@ -72,7 +80,9 @@ class MapViewModel(
                     }
                 },
                 onFailure = { error ->
-                    errorMessageLiveData.value = "Ошибка: ${error.toString()}"
+                    withContext(Dispatchers.Main) {
+                        errorMessageLiveData.value = "Ошибка: ${error.toString()}"
+                    }
                 })
         }
     }
