@@ -264,11 +264,6 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun watchPublication(view: View)    {
-        val intent = Intent(this, PublicationActivity::class.java)
-        startActivity(intent)
-    }
-
     override fun onStart() {
         super.onStart()
     }

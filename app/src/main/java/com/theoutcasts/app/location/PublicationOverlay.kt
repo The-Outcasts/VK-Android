@@ -90,8 +90,6 @@ class PublicationOverlay(context: Context, activity: Activity, userID: String) :
 
     override fun onSingleTapConfirmed(e: MotionEvent?, mapView: MapView?): Boolean {
         val intent = Intent(con, PublicationActivity::class.java)
-        intent.putExtra(EXTRA_ALT,position.altitude)
-        intent.putExtra(EXTRA_LONG,position.longitude)
         intent.putExtra(EXTRA_USER,userId)
         intent.putExtra(EXTRA_EVENT,eventID)
         act.startActivity(intent)
