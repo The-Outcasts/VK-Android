@@ -136,7 +136,7 @@ class MainActivity : AppCompatActivity() {
         binding.addPublicationButton.setOnClickListener {
             val intent = Intent(this, NewPublicationActivity::class.java)
             intent.putExtra("latitude", startPoint.latitude)
-            intent.putExtra("longtitude", startPoint.longitude)
+            intent.putExtra("longitude", startPoint.longitude)
             startActivity(intent)
         }
 

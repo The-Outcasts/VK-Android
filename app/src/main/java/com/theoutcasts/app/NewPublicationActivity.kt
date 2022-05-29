@@ -52,7 +52,7 @@ class NewPublicationActivity : AppCompatActivity() {
         try {
             getResult.launch(takePictureIntent)
         } catch (e: ActivityNotFoundException) {
-            Toast.makeText(this, "Could not launch camera", Toast.LENGTH_LONG)
+            Toast.makeText(this, "Could not launch camera", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -80,7 +80,7 @@ class NewPublicationActivity : AppCompatActivity() {
                 },
                 onFailure = {
                     withContext(Dispatchers.Main) {
-                        Toast.makeText(this@NewPublicationActivity, it.toString(), Toast.LENGTH_LONG)
+                        Toast.makeText(this@NewPublicationActivity, it.toString(), Toast.LENGTH_LONG).show()
                     }
                 }
             )
