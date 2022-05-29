@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat.startActivity
 import com.theoutcasts.app.MainActivity
 import com.theoutcasts.app.PublicationActivity
+import com.theoutcasts.app.ui.eventpublication.EventPublicationActivity
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.Projection
@@ -32,7 +33,6 @@ class PublicationOverlay(context: Context, activity: Activity, userID: String) :
     private lateinit var mImage:Bitmap
     private lateinit var position:GeoPoint
     private lateinit var eventID:String
-
 
     private var iconMatrix = Matrix()
     private var imageMatrix = Matrix()
@@ -89,7 +89,7 @@ class PublicationOverlay(context: Context, activity: Activity, userID: String) :
     }
 
     override fun onSingleTapConfirmed(e: MotionEvent?, mapView: MapView?): Boolean {
-        val intent = Intent(con, PublicationActivity::class.java)
+        val intent = Intent(con, EventPublicationActivity::class.java)
         intent.putExtra(EXTRA_USER,userId)
         intent.putExtra(EXTRA_EVENT,eventID)
         act.startActivity(intent)
