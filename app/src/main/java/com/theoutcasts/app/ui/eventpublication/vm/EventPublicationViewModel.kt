@@ -14,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -35,6 +36,8 @@ class EventPublicationViewModel(
 
     private val mComments = MutableLiveData<ArrayList<Comment>>()
     val comments: LiveData<ArrayList<Comment>> = mComments
+
+    private val postedCommentFlag = MutableLiveData<Boolean>()
 
     private var mEvent: Event? = null
 
@@ -81,14 +84,16 @@ class EventPublicationViewModel(
                     username = user.username
                     eventId = mEvent!!.id
                     content = aContent
-                    timestamp = Date().toString()
+                    timestamp = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.CANADA)
+                        .format(Date())
+                        .toString()
                 }
 
                 mCommentInteractor.save(comment).onFailure { e ->
                     withContext(Dispatchers.Main) { mErrorMessage.value = e.toString()}
                 }
 
-                mComments.value!!.add(comment)
+                withContext(Dispatchers.Main) { mComments.value!!.add(comment) }
             }
         }
     }
