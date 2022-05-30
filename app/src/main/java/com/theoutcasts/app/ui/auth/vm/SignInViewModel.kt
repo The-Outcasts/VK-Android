@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.theoutcasts.app.MainActivity
+import com.theoutcasts.app.domain.interactor.CurrentUser
 import com.theoutcasts.app.domain.interactor.InvalidLoginOrPasswordException
 import com.theoutcasts.app.domain.interactor.UserInteractor
 import com.theoutcasts.app.domain.model.User
@@ -20,9 +21,9 @@ class SignInViewModel(
 ) : ViewModel() {
 
     private val errorMessageLiveData = MutableLiveData<String>()
-    val errorMessage: LiveData<String> = errorMessageLiveData
-
     private val signedUserLiveData = MutableLiveData<User>()
+
+    val errorMessage: LiveData<String> = errorMessageLiveData
     val signedUser: LiveData<User> = signedUserLiveData
 
     fun signInWithEmailAndPassword(email: String, password: String) {
@@ -35,13 +36,14 @@ class SignInViewModel(
                     authResult.fold(
                         onSuccess = { user ->
                             withContext(Dispatchers.Main) { signedUserLiveData.value = user }
+                            CurrentUser.loadAuthorized(userInteractor)
                         },
                         onFailure = { e ->
                             withContext(Dispatchers.Main) {
                                 if (e is InvalidLoginOrPasswordException) {
                                     errorMessageLiveData.value = "Не удалось авторизоваться"
                                 } else {
-                                    errorMessageLiveData.value = "Ошибка: ${e.toString()}"
+                                    errorMessageLiveData.value = "Ошибка: $e"
                                 }
                             }
                         })

@@ -3,6 +3,7 @@ package com.theoutcasts.app.ui.eventpublication
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.ImageButton
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
@@ -22,6 +23,8 @@ class EventPublicationActivity : AppCompatActivity() {
     private val mButtonComment: ImageButton by lazy { findViewById(R.id.btn_show_comments) }
     private val mButtonWatchPublication: ImageButton by lazy { findViewById(R.id.btn_show_publication) }
     private val mButtonLike: ImageButton by lazy { findViewById(R.id.btn_like) }
+    private val mCommentCount: TextView by lazy { findViewById(R.id.tv_comment_count) }
+    private val mLikeCount: TextView by lazy { findViewById(R.id.tv_like_count) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,22 +33,47 @@ class EventPublicationActivity : AppCompatActivity() {
         mViewModel = ViewModelProvider(
             this, EventPublicationViewModelFactory())[EventPublicationViewModel::class.java]
 
-        replaceFragment(ContentFragment.newInstance(mEventId),
-                        R.id.fl_fragment_container)
+        replaceFragment(ContentFragment.newInstance(mEventId), R.id.fl_fragment_container)
 
+        setupButtonCallbacks()
+        setupLiveDataObservers()
+    }
+
+    private fun setupButtonCallbacks() {
         mButtonLike.setOnClickListener {
             mViewModel.likePublication()
-            findViewById<ImageButton>(R.id.btn_like).setImageBitmap(
-                ContextCompat.getDrawable(this,R.drawable.icon_heart_filled_96)!!.toBitmap()
-            )
         }
 
         mButtonComment.setOnClickListener {
-            replaceFragment(CommentsFragment(), R.id.fl_fragment_container)
+            replaceFragment(CommentsFragment.newInstance(), R.id.fl_fragment_container)
         }
 
         mButtonWatchPublication.setOnClickListener {
             replaceFragment(ContentFragment(mEventId), R.id.fl_fragment_container)
+        }
+    }
+
+    private fun setupLiveDataObservers() {
+        mViewModel.commentCount.observe(this) { commentCount ->
+            mCommentCount.text = commentCount.toString()
+        }
+
+        mViewModel.likeCount.observe(this) { likeCount ->
+            mLikeCount.text = likeCount.toString()
+        }
+
+        mViewModel.isCurrentUserLikedEvent.observe(this) { isLiked ->
+            if (isLiked) {
+                mButtonLike.setImageBitmap(ContextCompat
+                    .getDrawable(this, R.drawable.icon_heart_filled_96)!!
+                    .toBitmap()
+                )
+            } else {
+                mButtonLike.setImageBitmap(ContextCompat
+                    .getDrawable(this, R.drawable.icon_heart_empty_80)!!
+                    .toBitmap()
+                )
+            }
         }
     }
 

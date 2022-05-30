@@ -1,13 +1,12 @@
 package com.theoutcasts.app.ui.eventpublication.fragment
 
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageButton
+import android.widget.*
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -26,12 +25,6 @@ class CommentsFragment : Fragment() {
 
     private var mCommentAdapter: CommentAdapter? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        mViewModel.loadComments()
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -46,6 +39,13 @@ class CommentsFragment : Fragment() {
         mButtonPostComment = view.findViewById(R.id.btn_post_comment)
         mCommentEditText = view.findViewById(R.id.et_comment)
 
+        setupButtonCallbacks()
+        setupLiveDataObservers()
+
+        mViewModel.loadComments()
+    }
+
+    private fun setupButtonCallbacks() {
         mButtonPostComment.setOnClickListener {
             if (mCommentEditText.text.isNotEmpty()) {
                 val content = mCommentEditText.text.toString()
@@ -53,7 +53,9 @@ class CommentsFragment : Fragment() {
                 mCommentEditText.setText("")
             }
         }
+    }
 
+    private fun setupLiveDataObservers() {
         mViewModel.comments.observe(activity as LifecycleOwner) { comments ->
             if (mCommentAdapter == null) {
                 mCommentAdapter = CommentAdapter(comments)
@@ -61,9 +63,18 @@ class CommentsFragment : Fragment() {
                 mCommentRv.layoutManager = layoutManager
                 mCommentRv.itemAnimator = DefaultItemAnimator()
                 mCommentRv.adapter = mCommentAdapter
-            } else {
-                mCommentAdapter!!.notifyItemInserted(mCommentAdapter!!.itemCount - 1)
             }
+        }
+
+        mViewModel.postedCommentFlag.observe(activity as LifecycleOwner) { flag ->
+            if (flag) {
+                mCommentAdapter!!.notifyItemInserted(mCommentAdapter!!.itemCount - 1)
+                mViewModel.postedCommentFlag.value = false
+            }
+        }
+
+        mViewModel.errorMessage.observe(activity as LifecycleOwner) { e ->
+            Toast.makeText(activity as Context, "Ошибка: $e", Toast.LENGTH_LONG).show()
         }
     }
 
