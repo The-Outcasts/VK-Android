@@ -17,32 +17,35 @@
             android:supportsRtl="true"
             android:theme="@style/Theme.TheOutcastsApp">
         <activity
+                android:name=".ui.createpublication.CreatePublicationActivity"
+                android:exported="false" />
+        <activity
                 android:name=".ui.eventpublication.EventPublicationActivity"
                 android:exported="true"
                 android:parentActivityName=".MainActivity">
-                <!--<intent-filter>
-                    <action android:name="android.intent.action.MAIN" />
-                    <category android:name="android.intent.category.LAUNCHER" />
-                </intent-filter>-->
-        </activity>
 
-        <activity
-                android:name=".ui.auth.SignUpActivity"
-                android:exported="true">
+            <!--
                 <intent-filter>
                     <action android:name="android.intent.action.MAIN" />
                     <category android:name="android.intent.category.LAUNCHER" />
                 </intent-filter>
+            -->
         </activity>
+        <activity
+                android:name=".ui.auth.SignUpActivity"
+                android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity
                 android:name=".ui.auth.SignInActivity"
                 android:exported="false" />
-
         <activity
                 android:name=".MainActivity"
                 android:exported="true" />
-
         <activity
                 android:name=".PublicationActivity"
                 android:exported="false"

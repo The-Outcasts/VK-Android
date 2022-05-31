@@ -22,6 +22,7 @@ import com.theoutcasts.app.databinding.ActivityMainBinding
 import com.theoutcasts.app.location.LocationProviderChangedReceiver
 import com.theoutcasts.app.location.MyEventLocationSettingsChange
 import com.theoutcasts.app.location.PublicationOverlay
+import com.theoutcasts.app.ui.createpublication.CreatePublicationActivity
 import com.theoutcasts.app.ui.map.model.EventUi
 import com.theoutcasts.app.ui.map.vm.MapViewModel
 import com.theoutcasts.app.ui.map.vm.MapViewModelFactory
@@ -134,7 +135,7 @@ class MainActivity : AppCompatActivity() {
         activityResultLauncher.launch(appPerms)
 
         binding.addPublicationButton.setOnClickListener {
-            val intent = Intent(this, NewPublicationActivity::class.java)
+            val intent = Intent(this, CreatePublicationActivity::class.java)
             intent.putExtra("latitude", startPoint.latitude)
             intent.putExtra("longitude", startPoint.longitude)
             startActivity(intent)
@@ -177,7 +178,7 @@ class MainActivity : AppCompatActivity() {
         )
 
         publication.setEventId(eventUi.domain.id!!)
-        publication.setPosition(GeoPoint(eventUi.domain.longitude!!, eventUi.domain.latitude!!))
+        publication.setPosition(GeoPoint(eventUi.domain.latitude!!, eventUi.domain.longitude!!))
         publication.setIcon(ContextCompat.getDrawable(this,R.drawable.icon)!!.toBitmap())
 
         if (eventUi.pictureBitmap == null) {

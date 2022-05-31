@@ -7,10 +7,13 @@ import androidx.lifecycle.ViewModel
 import com.theoutcasts.app.domain.interactor.*
 import com.theoutcasts.app.domain.model.Comment
 import com.theoutcasts.app.domain.model.Event
+import com.theoutcasts.app.domain.util.TimeStampFormater
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.osmdroid.views.overlay.ItemizedIconOverlay
+import org.osmdroid.views.overlay.ItemizedOverlay
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -85,10 +88,16 @@ class EventPublicationViewModel(
                             withContext(Dispatchers.Main) {
                                 mEventPicture.value = bitmap
                             }
-
                         }.onFailure { e ->
-                            withContext(Dispatchers.Main) {
-                                mErrorMessage.value = "Не удалось загрузить изображение: $e"
+                            if (e is ImageNotFoundException) {
+                                withContext(Dispatchers.Main) {
+                                    mErrorMessage.value =
+                                        "Изображение не найдено. Возможно оно было удалено"
+                                }
+                            } else {
+                                withContext(Dispatchers.Main) {
+                                    mErrorMessage.value = "Не удалось загрузить изображение: $e"
+                                }
                             }
                         }
                 }.onFailure { e ->
@@ -110,7 +119,9 @@ class EventPublicationViewModel(
                 .onSuccess { comments ->
                     withContext(Dispatchers.Main) { mComments.value = ArrayList(comments) }
                 }.onFailure { e ->
-                    withContext(Dispatchers.Main) { mErrorMessage.value = e.toString() }
+                    withContext(Dispatchers.Main) {
+                        mErrorMessage.value = "Ошибка загрузаки комментариев: $e"
+                    }
                 }
         }
     }
@@ -126,9 +137,7 @@ class EventPublicationViewModel(
                         username = user.username
                         eventId = mEvent!!.id!!
                         content = aContent
-                        timestamp = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.CANADA)
-                            .format(Date())
-                            .toString()
+                        timestamp = TimeStampFormater.getCurrentDateAsString()
                     }
 
                     withContext(Dispatchers.Main) {
@@ -143,7 +152,7 @@ class EventPublicationViewModel(
                     mCommentInteractor.save(comment)
                         .onFailure { e ->
                             withContext(Dispatchers.Main) {
-                                mErrorMessage.value = e.toString()
+                                mErrorMessage.value = "Не удалось сохранить комментарий: $e"
                             }
                         }
 
@@ -177,3 +186,4 @@ class EventPublicationViewModel(
         }
     }
 }
+
