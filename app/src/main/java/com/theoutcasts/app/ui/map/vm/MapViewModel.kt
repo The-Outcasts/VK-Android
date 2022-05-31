@@ -12,6 +12,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.overlay.ItemizedIconOverlay
+import org.osmdroid.views.overlay.ItemizedOverlay
+import org.osmdroid.views.overlay.ItemizedOverlayWithFocus
+import org.osmdroid.views.overlay.OverlayItem
 
 class MapViewModel(
     private val eventInteractor: EventInteractor,
@@ -21,7 +26,6 @@ class MapViewModel(
 
     private val errorMessageLiveData = MutableLiveData<String>()
     val errorMessage: LiveData<String> = errorMessageLiveData
-
     private val eventsLiveData = MutableLiveData<List<EventUi>>()
     val events: LiveData<List<EventUi>> = eventsLiveData
 

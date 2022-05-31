@@ -8,9 +8,11 @@ import android.location.LocationManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Looper
+import android.view.MotionEvent
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.ViewModelProvider
@@ -29,8 +31,16 @@ import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.ItemizedIconOverlay
+import org.osmdroid.views.overlay.ItemizedOverlay
 import timber.log.Timber
 import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.OverlayItem
+
+class EventMarker(
+    map: MapView,
+    val eventId: String
+) : Marker(map) { }
 
 class MainActivity : AppCompatActivity() {
     private lateinit var vm: MapViewModel
@@ -89,6 +99,7 @@ class MainActivity : AppCompatActivity() {
     private var startPoint: GeoPoint = GeoPoint(55.772932, 37.698825) //Москва
     private lateinit var mapController: IMapController
     private lateinit var currentPositionMarker: Marker
+    private val markerItems = ArrayList<OverlayItem>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         vm = ViewModelProvider(this, MapViewModelFactory())[MapViewModel::class.java]
@@ -103,6 +114,7 @@ class MainActivity : AppCompatActivity() {
 
         vm.events.observe(this) {
             drawPublicationOverlays()
+            //
         }
 
         super.onCreate(savedInstanceState)
@@ -163,6 +175,7 @@ class MainActivity : AppCompatActivity() {
         vm.events.value ?.let {
             for (event in it) {
                 drawPublicationOverlay(event)
+                drawEventMarker(event)
             }
         }
         map.invalidate()
@@ -180,13 +193,32 @@ class MainActivity : AppCompatActivity() {
         publication.setPosition(GeoPoint(eventUi.domain.longitude!!, eventUi.domain.latitude!!))
         publication.setIcon(ContextCompat.getDrawable(this,R.drawable.icon)!!.toBitmap())
 
+
         if (eventUi.pictureBitmap == null) {
             publication.setImage(notLoadedPictureBitmap)
         } else {
             publication.setImage(eventUi.pictureBitmap!!)
         }
 
-        map.overlayManager.add(publication)
+       map.overlayManager.add(publication)
+    }
+
+    private fun drawEventMarker(eventUi: EventUi) {
+        val marker = EventMarker(map, eventUi.domain.id!!)
+        marker.position = GeoPoint(eventUi.domain.longitude!!, eventUi.domain.latitude!!)
+        marker.setVisible(false)
+
+        marker.setOnMarkerClickListener { marker, _ ->
+            val eventMarker = marker as EventMarker
+
+                val intent = Intent(this, PublicationActivity::class.java)
+                intent.putExtra("USER_ID", vm.user.value!!.id)
+                intent.putExtra("EVENT_ID", eventUi.domain.id!!)
+                startActivity(intent)
+
+            true
+        }
+        map.overlays.add(marker)
     }
 
     private fun initCheckLocationSettings() {
@@ -285,4 +317,7 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
     }
+
+    //fun draEventMarker сделать фунция драв ивент маркер(айди ивента) и создать там листенеры для маркеров
+    // из draPublOverlay удалить листенер
 }
