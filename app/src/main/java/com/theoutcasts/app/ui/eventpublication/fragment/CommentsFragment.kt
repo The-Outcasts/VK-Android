@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.theoutcasts.app.R
+import com.theoutcasts.app.ui.eventpublication.CommentAdapter
 import com.theoutcasts.app.ui.eventpublication.vm.EventPublicationViewModel
 
 

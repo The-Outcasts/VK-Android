@@ -33,4 +33,7 @@ class EventInteractor(private val eventRepository: EventRepository) {
 
     suspend fun checkIfUserLikedEvent(userId: String, eventId: String): Result<Boolean> =
         eventRepository.checkIfUserLikedEvent(userId, eventId)
+
+    suspend fun likeEvent(userId: String, eventId: String) =
+        eventRepository.likeEvent(userId, eventId)
 }

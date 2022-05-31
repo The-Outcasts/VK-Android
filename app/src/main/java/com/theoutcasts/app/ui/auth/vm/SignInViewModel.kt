@@ -1,13 +1,9 @@
 package com.theoutcasts.app.ui.auth.vm
 
-import android.content.Intent
 import android.text.TextUtils
-import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.theoutcasts.app.MainActivity
-import com.theoutcasts.app.domain.interactor.CurrentUser
 import com.theoutcasts.app.domain.interactor.InvalidLoginOrPasswordException
 import com.theoutcasts.app.domain.interactor.UserInteractor
 import com.theoutcasts.app.domain.model.User
@@ -36,7 +32,6 @@ class SignInViewModel(
                     authResult.fold(
                         onSuccess = { user ->
                             withContext(Dispatchers.Main) { signedUserLiveData.value = user }
-                            CurrentUser.loadAuthorized(userInteractor)
                         },
                         onFailure = { e ->
                             withContext(Dispatchers.Main) {

@@ -14,6 +14,9 @@ class UserIsNotAuthenticatedException: Exception("User is not authenticated")
 
 class UserInteractor(private val userRepository: UserRepository) {
 
+    fun getAuthenticatedUserId(): String? =
+        userRepository.getAuthenticatedUserId()
+
     suspend fun getAuthenticatedUser(): Result<User> =
         userRepository.getAuthenticatedUser()
 
@@ -26,22 +29,4 @@ class UserInteractor(private val userRepository: UserRepository) {
 
     suspend fun signOut() =
         userRepository.signOut()
-}
-
-object CurrentUser {
-    var value: User? = null
-        private set
-
-    fun loadAuthorized(userInteractor: UserInteractor) {
-        GlobalScope.launch(Dispatchers.IO) {
-            value = userInteractor.getAuthenticatedUser().getOrThrow()
-        }
-    }
-
-    fun signOut(userInteractor: UserInteractor) {
-        GlobalScope.launch(Dispatchers.IO) {
-            userInteractor.signOut()
-            value = null
-        }
-    }
 }

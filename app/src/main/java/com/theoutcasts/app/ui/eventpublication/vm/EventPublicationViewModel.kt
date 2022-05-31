@@ -67,16 +67,17 @@ class EventPublicationViewModel(
                         }
 
                     /* Check if user liked this event */
-                    /*
-                    mEventInteractor.checkIfUserLikedEvent(CurrentUser.value!!.id, eventId)
+                    val userId = mUserInteractor.getAuthenticatedUserId()!!
+                    mEventInteractor.checkIfUserLikedEvent(userId, eventId)
                         .onSuccess { isLiked ->
-                            mIsCurrentUserLikedEvent.value = isLiked
+                            withContext(Dispatchers.Main) {
+                                mIsCurrentUserLikedEvent.value = isLiked
+                            }
                         }.onFailure { e ->
                             withContext(Dispatchers.Main) {
-                                mErrorMessage.value = "Произошла ошибка: $e"
+                                mErrorMessage.value = "Произошла ошибка checkIfUserLikedEvent: $e"
                             }
                         }
-                    */
 
                     /* Load event picture */
                     mImageInteractor.downloadImage(event.pictureURL!!)
@@ -169,6 +170,10 @@ class EventPublicationViewModel(
                 val updatedState = !(mIsCurrentUserLikedEvent.value!!)
                 mIsCurrentUserLikedEvent.value = updatedState
             }
+        }
+
+        GlobalScope.launch(Dispatchers.IO) {
+            mEventInteractor.likeEvent(mUserInteractor.getAuthenticatedUserId()!!, mEvent!!.id!!)
         }
     }
 }

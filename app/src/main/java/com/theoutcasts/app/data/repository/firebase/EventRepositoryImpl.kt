@@ -1,5 +1,6 @@
 package com.theoutcasts.app.data.repository.firebase
 
+import android.text.BoringLayout
 import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
@@ -167,29 +168,45 @@ class EventRepositoryImpl(
     }
 
     override suspend fun checkIfUserLikedEvent(userId: String, eventId: String): Result<Boolean> {
-        return try {
-            val response = rootReference
+        try {
+            val currentLikeState = rootReference
                 .child(LIKES_NODE_NAME)
+                .child(eventId)
                 .child(userId)
-                .child("events")
-                .orderByValue()
-                .equalTo(eventId)
                 .get().await()
 
-            if (response.exists()) {
-                Result.success(true)
-            } else {
-                Result.success(false)
+            if (currentLikeState.exists()) {
+                return Result.success(true)
             }
-        } catch (e: NullPointerException) {
-            Result.success(false)
+            return Result.success(false)
         } catch (e: Exception) {
-            Result.failure(e)
+            return Result.failure(e)
         }
     }
 
     override suspend fun likeEvent(userId: String, eventId: String) {
-        TODO("Not yet implemented")
+        try {
+            val currentLikeState = rootReference
+                .child(LIKES_NODE_NAME)
+                .child(eventId)
+                .child(userId)
+                .get().await()
+
+            if (currentLikeState.exists()) {
+                rootReference
+                    .child(LIKES_NODE_NAME)
+                    .child(eventId)
+                    .child(userId).removeValue()
+            } else {
+                rootReference
+                    .child(LIKES_NODE_NAME)
+                    .child(eventId)
+                    .child(userId).setValue(true)
+            }
+
+        } catch (e: Exception) {
+            Timber.e("[Firebase.EventRepositoryImpl].likeEvent() failed: $e")
+        }
     }
 
     companion object {

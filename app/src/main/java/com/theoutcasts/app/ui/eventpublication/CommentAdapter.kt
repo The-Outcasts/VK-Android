@@ -1,4 +1,4 @@
-package com.theoutcasts.app.ui.eventpublication.fragment
+package com.theoutcasts.app.ui.eventpublication
 
 import android.view.LayoutInflater
 import android.view.View
@@ -17,12 +17,12 @@ class CommentAdapter(
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
-    ): CommentAdapter.CommentViewHolder {
+    ): CommentViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.comment_item, parent, false)
         return CommentViewHolder(itemView)
     }
 
-    override fun onBindViewHolder(holder: CommentAdapter.CommentViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: CommentViewHolder, position: Int) {
         holder.authorUsernameTextView.text = mComments[position].username
         holder.contentTextView.text = mComments[position].content
     }

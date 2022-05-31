@@ -8,10 +8,18 @@ import com.theoutcasts.app.domain.model.User
 import com.theoutcasts.app.domain.repository.UserRepository
 import kotlinx.coroutines.tasks.await
 
+
+
 class UserRepositoryImpl : UserRepository {
     private var firebaseAuthService: FirebaseAuth = FirebaseAuth.getInstance()
     private val nodeReference = Firebase.database(DATABASE_CONNECTION_STRING).reference.child(
         NODE_NAME)
+
+    override fun getAuthenticatedUserId(): String? {
+        val firebaseUser = firebaseAuthService.currentUser ?: return null
+        return firebaseUser.uid
+    }
+
 
     override suspend fun getAuthenticatedUser(): Result<User> {
         return try {
