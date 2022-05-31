@@ -25,6 +25,7 @@ import com.theoutcasts.app.location.LocationProviderChangedReceiver
 import com.theoutcasts.app.location.MyEventLocationSettingsChange
 import com.theoutcasts.app.location.PublicationOverlay
 import com.theoutcasts.app.ui.createpublication.CreatePublicationActivity
+import com.theoutcasts.app.ui.eventpublication.EventPublicationActivity
 import com.theoutcasts.app.ui.map.model.EventUi
 import com.theoutcasts.app.ui.map.vm.MapViewModel
 import com.theoutcasts.app.ui.map.vm.MapViewModelFactory
@@ -173,13 +174,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun drawPublicationOverlays() {
-        vm.events.value ?.let {
-            for (event in it) {
-                drawPublicationOverlay(event)
-                drawEventMarker(event)
+        try {
+            vm.events.value?.let {
+                for (event in it) {
+                    drawPublicationOverlay(event)
+                    drawEventMarker(event)
+                }
             }
+            map.invalidate()
+        } catch (e: IllegalArgumentException) {
+            Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show()
         }
-        map.invalidate()
     }
 
     private fun drawPublicationOverlay(eventUi: EventUi) {
@@ -191,7 +196,7 @@ class MainActivity : AppCompatActivity() {
         )
 
         publication.setEventId(eventUi.domain.id!!)
-        publication.setPosition(GeoPoint(eventUi.domain.latitude!!, eventUi.domain.longitude!!))
+        publication.setPosition(GeoPoint(eventUi.domain.longitude!!, eventUi.domain.latitude!!))
         publication.setIcon(ContextCompat.getDrawable(this,R.drawable.icon)!!.toBitmap())
 
 
@@ -212,7 +217,7 @@ class MainActivity : AppCompatActivity() {
         marker.setOnMarkerClickListener { marker, _ ->
             val eventMarker = marker as EventMarker
 
-                val intent = Intent(this, PublicationActivity::class.java)
+                val intent = Intent(this, EventPublicationActivity::class.java)
                 intent.putExtra("USER_ID", vm.user.value!!.id)
                 intent.putExtra("EVENT_ID", eventUi.domain.id!!)
                 startActivity(intent)
