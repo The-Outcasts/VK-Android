@@ -95,11 +95,11 @@ class MainActivity : AppCompatActivity() {
         vm = ViewModelProvider(this, MapViewModelFactory())[MapViewModel::class.java]
 
         vm.errorMessage.observe(this) {
-            Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, it, Toast.LENGTH_LONG).show()
         }
 
         vm.user.observe(this) {
-            Toast.makeText(this, it.username, Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, it.username, Toast.LENGTH_LONG).show()
         }
 
         vm.events.observe(this) {
