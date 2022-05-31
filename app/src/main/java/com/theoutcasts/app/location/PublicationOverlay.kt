@@ -1,27 +1,11 @@
 package com.theoutcasts.app.location
 
-import android.app.Activity
-import android.content.Context
-import android.content.Intent
 import android.graphics.*
-import android.view.MotionEvent
-import com.theoutcasts.app.ui.eventpublication.EventPublicationActivity
 import org.osmdroid.util.GeoPoint
-import org.osmdroid.views.MapView
 import org.osmdroid.views.Projection
 import org.osmdroid.views.overlay.Overlay
 
-class PublicationOverlay(context: Context, activity: Activity, userID: String) : Overlay() {
-    companion object {
-        const val EXTRA_ALT = "LOCATION_ALTITUDE"
-        const val EXTRA_LONG = "LOCATION_LONGITUDE"
-        const val EXTRA_USER = "USER_ID"
-        const val EXTRA_EVENT = "EVENT_ID"
-    }
-
-    private val con = context
-    private val act = activity
-    private val userId = userID
+class PublicationOverlay : Overlay() {
     private lateinit var mIcon:Bitmap
     private lateinit var mImage:Bitmap
     private lateinit var position:GeoPoint
@@ -33,7 +17,6 @@ class PublicationOverlay(context: Context, activity: Activity, userID: String) :
     private val imageHeight = 100
     private val iconWidth = 160
     private val iconHeight = 160
-    private val mainContext = context
 
 
     fun setImage(newImage: Bitmap) {
@@ -43,24 +26,13 @@ class PublicationOverlay(context: Context, activity: Activity, userID: String) :
     fun setIcon(newIcon: Bitmap) {
         mIcon = Bitmap.createScaledBitmap(newIcon,iconWidth,iconHeight,false)
     }
-    fun getImage(): Bitmap {
-        return mImage
-    }
 
     fun setPosition(oPosition: GeoPoint) {
         position = oPosition
     }
 
-    fun getPosition(): GeoPoint {
-        return position
-    }
-
     fun setEventId(clickedEventId: String)   {
         eventID = clickedEventId
-    }
-
-    fun getEventId():String   {
-        return eventID
     }
 
 
@@ -77,15 +49,10 @@ class PublicationOverlay(context: Context, activity: Activity, userID: String) :
         val y0 = pProjection.getLongPixelYFromLatitude(position.latitude)-imageHeight.toLong()
 
         iconMatrix.postTranslate(x0.toFloat(),y0.toFloat())
-        imageMatrix.postTranslate((x0+((iconWidth-imageWidth)/2).toLong()).toFloat(),(y0+((iconHeight-imageHeight)/6).toFloat()))
+        imageMatrix.postTranslate(
+            (x0+((iconWidth-imageWidth)/2).toLong()).toFloat(),
+            (y0+((iconHeight-imageHeight)/6).toFloat())
+        )
 
     }
-
-//    override fun onSingleTapConfirmed(e: MotionEvent?, mapView: MapView?): Boolean {
-//        val intent = Intent(con, PublicationActivity::class.java)
-//        intent.putExtra(EXTRA_USER,userId)
-//        intent.putExtra(EXTRA_EVENT,eventID)
-//        act.startActivity(intent)
-//        return super.onSingleTapConfirmed(e, mapView)
-//    }
 }

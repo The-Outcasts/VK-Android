@@ -25,29 +25,13 @@ class MapViewModel(
 ) : ViewModel() {
 
     private val errorMessageLiveData = MutableLiveData<String>()
-    val errorMessage: LiveData<String> = errorMessageLiveData
     private val eventsLiveData = MutableLiveData<List<EventUi>>()
+
+    val errorMessage: LiveData<String> = errorMessageLiveData
     val events: LiveData<List<EventUi>> = eventsLiveData
 
     private val _user = MutableLiveData<User>()
     val user: LiveData<User> = _user
-
-    fun loadUser() {
-        GlobalScope.launch(Dispatchers.IO) {
-            userInteractor.getAuthenticatedUser().fold(
-                onSuccess = {
-                    withContext(Dispatchers.Main) {
-                        _user.value = it
-                    }
-                },
-                onFailure = { error ->
-                    withContext(Dispatchers.Main) {
-                        errorMessageLiveData.value = error.toString()
-                    }
-                }
-            )
-        }
-    }
 
     fun loadEvents() {
         GlobalScope.launch(Dispatchers.IO) {

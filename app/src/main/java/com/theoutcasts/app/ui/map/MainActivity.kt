@@ -8,11 +8,9 @@ import android.location.LocationManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Looper
-import android.view.MotionEvent
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.ViewModelProvider
@@ -26,6 +24,7 @@ import com.theoutcasts.app.location.MyEventLocationSettingsChange
 import com.theoutcasts.app.location.PublicationOverlay
 import com.theoutcasts.app.ui.createpublication.CreatePublicationActivity
 import com.theoutcasts.app.ui.eventpublication.EventPublicationActivity
+import com.theoutcasts.app.ui.map.EventMarker
 import com.theoutcasts.app.ui.map.model.EventUi
 import com.theoutcasts.app.ui.map.vm.MapViewModel
 import com.theoutcasts.app.ui.map.vm.MapViewModelFactory
@@ -33,16 +32,10 @@ import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
-import org.osmdroid.views.overlay.ItemizedIconOverlay
-import org.osmdroid.views.overlay.ItemizedOverlay
 import timber.log.Timber
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.OverlayItem
 
-class EventMarker(
-    map: MapView,
-    val eventId: String
-) : Marker(map) { }
 
 class MainActivity : AppCompatActivity() {
     private lateinit var vm: MapViewModel
@@ -154,14 +147,12 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        vm.loadUser()
         vm.loadEvents()
     }
 
     fun updateLocation(newLocation: Location) {
         lastLocation = newLocation
-        //GUI, MAP TODO
-        //var currentPoint: GeoPoint = GeoPoint(newLocation.latitude, newLocation.longitude);
+
         startPoint.longitude = newLocation.longitude
         startPoint.latitude = newLocation.latitude
         mapController.setCenter(startPoint)
@@ -190,10 +181,7 @@ class MainActivity : AppCompatActivity() {
     private fun drawPublicationOverlay(eventUi: EventUi) {
         val notLoadedPictureBitmap = ContextCompat.getDrawable(this,R.drawable.logo_black)!!.toBitmap()
 
-        val publication = PublicationOverlay(
-            this, this,
-            vm.user.value!!.id
-        )
+        val publication = PublicationOverlay()
 
         publication.setEventId(eventUi.domain.id!!)
         publication.setPosition(GeoPoint(eventUi.domain.longitude!!, eventUi.domain.latitude!!))
@@ -218,7 +206,6 @@ class MainActivity : AppCompatActivity() {
             val eventMarker = marker as EventMarker
 
                 val intent = Intent(this, EventPublicationActivity::class.java)
-                intent.putExtra("USER_ID", vm.user.value!!.id)
                 intent.putExtra("EVENT_ID", eventUi.domain.id!!)
                 startActivity(intent)
 
@@ -301,10 +288,6 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    override fun onStart() {
-        super.onStart()
-    }
-
     override fun onResume() {
         super.onResume()
         initLocation()
@@ -315,15 +298,4 @@ class MainActivity : AppCompatActivity() {
         super.onPause()
         stopLocationUpdates()
     }
-
-    override fun onStop() {
-        super.onStop()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-    }
-
-    //fun draEventMarker сделать фунция драв ивент маркер(айди ивента) и создать там листенеры для маркеров
-    // из draPublOverlay удалить листенер
 }
