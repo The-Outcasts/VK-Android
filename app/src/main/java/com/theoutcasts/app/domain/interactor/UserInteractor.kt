@@ -2,6 +2,9 @@ package com.theoutcasts.app.domain.interactor
 
 import com.theoutcasts.app.domain.repository.UserRepository
 import com.theoutcasts.app.domain.model.User
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class UserAlreadyExistsException : Exception("User with provided credentials already exists")
 class InvalidLoginOrPasswordException: Exception("Invalid login or password")
@@ -10,6 +13,9 @@ class InvalidCredentialsException: Exception("Provided credentials badly formatt
 class UserIsNotAuthenticatedException: Exception("User is not authenticated")
 
 class UserInteractor(private val userRepository: UserRepository) {
+
+    fun getAuthenticatedUserId(): String? =
+        userRepository.getAuthenticatedUserId()
 
     suspend fun getAuthenticatedUser(): Result<User> =
         userRepository.getAuthenticatedUser()

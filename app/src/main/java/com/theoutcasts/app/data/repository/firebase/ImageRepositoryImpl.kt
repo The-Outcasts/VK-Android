@@ -3,7 +3,9 @@ package com.theoutcasts.app.data.repository.firebase
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.ktx.storage
+import com.theoutcasts.app.domain.interactor.ImageNotFoundException
 import com.theoutcasts.app.domain.repository.ImageRepository
 import kotlinx.coroutines.tasks.await
 import java.io.ByteArrayOutputStream
@@ -31,6 +33,8 @@ class ImageRepositoryImpl: ImageRepository {
             node.child(url).putBytes(byteStream.toByteArray())
 
             Result.success(url)
+        } catch (e: StorageException) {
+            Result.failure(ImageNotFoundException())
         } catch (e: Exception) {
             Result.failure(e)
         }

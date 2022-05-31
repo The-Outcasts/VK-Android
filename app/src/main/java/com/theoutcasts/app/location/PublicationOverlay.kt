@@ -4,14 +4,8 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.*
-import android.os.Bundle
-import android.util.Log
 import android.view.MotionEvent
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat.startActivity
-import com.theoutcasts.app.MainActivity
-import com.theoutcasts.app.PublicationActivity
+import com.theoutcasts.app.ui.eventpublication.EventPublicationActivity
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.Projection
@@ -32,7 +26,6 @@ class PublicationOverlay(context: Context, activity: Activity, userID: String) :
     private lateinit var mImage:Bitmap
     private lateinit var position:GeoPoint
     private lateinit var eventID:String
-
 
     private var iconMatrix = Matrix()
     private var imageMatrix = Matrix()

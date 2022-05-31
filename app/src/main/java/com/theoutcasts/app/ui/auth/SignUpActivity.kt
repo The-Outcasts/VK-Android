@@ -28,7 +28,7 @@ class SignUpActivity : AppCompatActivity() {
         vm = ViewModelProvider(this, SignUpViewModelFactory())[SignUpViewModel::class.java]
 
         vm.errorMessage.observe(this, Observer { errorMessage ->
-            Toast.makeText(this@SignUpActivity, errorMessage, Toast.LENGTH_SHORT)
+            Toast.makeText(this@SignUpActivity, errorMessage, Toast.LENGTH_LONG)
                 .show()
         })
 
