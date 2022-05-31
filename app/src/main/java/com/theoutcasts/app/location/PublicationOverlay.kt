@@ -4,14 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.*
-import android.os.Bundle
-import android.util.Log
 import android.view.MotionEvent
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat.startActivity
-import com.theoutcasts.app.MainActivity
-import com.theoutcasts.app.PublicationActivity
 import com.theoutcasts.app.ui.eventpublication.EventPublicationActivity
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
