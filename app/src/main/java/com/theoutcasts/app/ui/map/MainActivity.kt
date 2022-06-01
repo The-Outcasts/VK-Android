@@ -187,10 +187,8 @@ class MainActivity : AppCompatActivity() {
         val publication = PublicationOverlay()
 
         publication.setEventId(eventUi.domain.id!!)
-//        publication.setPosition(GeoPoint(eventUi.domain.longitude!!, eventUi.domain.latitude!!)) // TODO
         publication.setPosition(GeoPoint(eventUi.domain.latitude!!, eventUi.domain.longitude!!))
         publication.setIcon(ContextCompat.getDrawable(this, R.drawable.icon)!!.toBitmap())
-
 
         if (eventUi.pictureBitmap == null) {
             publication.setImage(notLoadedPictureBitmap)
@@ -203,19 +201,16 @@ class MainActivity : AppCompatActivity() {
 
     private fun putClickableEventMarker(eventUi: EventUi) {
         val marker = EventMarker(map, eventUi.domain.id!!)
-//        marker.position = GeoPoint(eventUi.domain.longitude!!, eventUi.domain.latitude!!) // TODO
         marker.position = GeoPoint(eventUi.domain.latitude!!, eventUi.domain.longitude!!) // TODO
         marker.setVisible(false)
 
         marker.setOnMarkerClickListener { marker, _ ->
-            val eventMarker = marker as EventMarker
-
             val intent = Intent(this, EventPublicationActivity::class.java)
             intent.putExtra("EVENT_ID", eventUi.domain.id!!)
             startActivity(intent)
-
             true
         }
+
         map.overlays.add(marker)
     }
 
@@ -228,9 +223,6 @@ class MainActivity : AppCompatActivity() {
             Timber.d("Settings Location IS OK")
             MyEventLocationSettingsChange.globalState = true //default
             initMap()
-            // All location settings are satisfied. The client can initialize
-            // location requests here.
-            // ...
         }
 
         task.addOnFailureListener { exception ->
