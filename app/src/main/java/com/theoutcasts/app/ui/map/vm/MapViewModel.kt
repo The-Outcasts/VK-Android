@@ -20,21 +20,30 @@ import org.osmdroid.views.overlay.OverlayItem
 
 class MapViewModel(
     private val eventInteractor: EventInteractor,
-    private val imageInteractor: ImageInteractor
+    private val imageInteractor: ImageInteractor,
+    private val userInteractor: UserInteractor,
 ) : ViewModel() {
 
     private val errorMessageLiveData = MutableLiveData<String>()
-    private val eventsLiveData = MutableLiveData<List<EventUi>>()
+    private val eventsLiveData = MutableLiveData<ArrayList<EventUi>>()
 
     val errorMessage: LiveData<String> = errorMessageLiveData
-    val events: LiveData<List<EventUi>> = eventsLiveData
+    val events: LiveData<ArrayList<EventUi>> = eventsLiveData
 
-    fun loadEvents() {
+    var mapShouldBeUpdated = false
+
+    fun loadEventsIfNotLoaded() {
+        if (eventsLiveData.value == null) {
+            reloadAllEvents()
+        }
+    }
+
+    fun reloadAllEvents() {
         GlobalScope.launch(Dispatchers.IO) {
             // load all events without pictures
             eventInteractor.getAll(100).fold(
                 onSuccess = { eventDomainList ->
-                    val eventUiList: MutableList<EventUi> = mutableListOf()
+                    val eventUiList = ArrayList<EventUi>()
                     for (eventDomain in eventDomainList) {
                         eventUiList.add(EventUi(eventDomain, null))
                     }
@@ -53,7 +62,7 @@ class MapViewModel(
                             },
                             onFailure = {
                                 withContext(Dispatchers.Main) {
-                                    errorMessageLiveData.value = "Ошибка: ${it.toString()}"
+                                    errorMessageLiveData.value = "Ошибка: $it"
                                 }
                             }
                         )
@@ -65,7 +74,7 @@ class MapViewModel(
                 },
                 onFailure = { error ->
                     withContext(Dispatchers.Main) {
-                        errorMessageLiveData.value = "Ошибка: ${error.toString()}"
+                        errorMessageLiveData.value = "Ошибка: $error}"
                     }
                 })
         }

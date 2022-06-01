@@ -15,6 +15,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.drawToBitmap
 import androidx.lifecycle.ViewModelProvider
 import com.theoutcasts.app.R
+import com.theoutcasts.app.ui.map.MainActivity
 
 class CreatePublicationActivity : AppCompatActivity() {
     private lateinit var mViewModel: CreatePublicationViewModel
@@ -47,7 +48,7 @@ class CreatePublicationActivity : AppCompatActivity() {
     }
 
     private fun setupButtonCallbacks() {
-        mButtonPublicate.setOnClickListener { publicateEvent() }
+        mButtonPublicate.setOnClickListener { publishEvent() }
         mImageButtonEventImage.setOnClickListener { uploadEventImage() }
     }
 
@@ -85,7 +86,7 @@ class CreatePublicationActivity : AppCompatActivity() {
         }
     }
 
-    private fun publicateEvent() {
+    private fun publishEvent() {
         val eventTitle = mEditTextEventTitle.text.toString().trim()
         val eventDescription = mEditTextEventDescription.text.toString().trim()
         val eventPicture = mImageButtonEventImage.drawToBitmap()

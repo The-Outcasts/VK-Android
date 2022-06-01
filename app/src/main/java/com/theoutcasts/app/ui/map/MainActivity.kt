@@ -18,7 +18,6 @@ import org.osmdroid.api.IMapController
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.Task
-import com.theoutcasts.app.BuildConfig
 import com.theoutcasts.app.R
 import com.theoutcasts.app.databinding.ActivityMainBinding
 import com.theoutcasts.app.location.LocationProviderChangedReceiver
@@ -41,11 +40,11 @@ import org.osmdroid.views.overlay.Marker
 *  +---------------------------------- MESS ----------------------------------+
 *                        Move setup, logic into ViewModel
 *  +--------------------------------------------------------------------------+
-*
+*                        WARNING: Здесь всё очень костыльно
 */
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var vm: MapViewModel
+    private lateinit var mMapViewModel: MapViewModel
 
     private var activityResultLauncher: ActivityResultLauncher<Array<String>>
     private lateinit var fusedLocationClient: FusedLocationProviderClient //https://developer.android.com/training/location/retrieve-current
@@ -97,28 +96,28 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        vm = ViewModelProvider(this, MapViewModelFactory())[MapViewModel::class.java]
-
-        vm.errorMessage.observe(this) {
-            Toast.makeText(this, it, Toast.LENGTH_LONG).show()
-        }
-
-        vm.events.observe(this) {
-            drawEventMarkers()
-        }
-
         super.onCreate(savedInstanceState)
-        if (BuildConfig.DEBUG) {
-            Timber.plant(Timber.DebugTree()) //Init report type
-        }
-
-        val br: BroadcastReceiver = LocationProviderChangedReceiver()
-        val filter = IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION)
-        registerReceiver(br, filter)
 
         Configuration.getInstance()
             .load(applicationContext, this.getPreferences(Context.MODE_PRIVATE))
         binding = ActivityMainBinding.inflate(layoutInflater) //ADD THIS LINE
+
+        // Move to stateholder
+        val br: BroadcastReceiver = LocationProviderChangedReceiver()
+        val filter = IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION)
+        registerReceiver(br, filter)
+
+
+        mMapViewModel = ViewModelProvider(this, MapViewModelFactory())[MapViewModel::class.java]
+
+
+        mMapViewModel.errorMessage.observe(this) {
+            Toast.makeText(this, it, Toast.LENGTH_LONG).show()
+        }
+
+        mMapViewModel.events.observe(this) {
+            drawEventMarkers()
+        }
 
         map = binding.map
         map.setTileSource(TileSourceFactory.MAPNIK)
@@ -136,13 +135,14 @@ class MainActivity : AppCompatActivity() {
         activityResultLauncher.launch(appPerms)
 
         binding.addPublicationButton.setOnClickListener {
+            mMapViewModel.mapShouldBeUpdated = true
             val intent = Intent(this, CreatePublicationActivity::class.java)
             intent.putExtra("latitude", startPoint.latitude)
             intent.putExtra("longitude", startPoint.longitude)
             startActivity(intent)
         }
 
-        vm.loadEvents()
+        mMapViewModel.loadEventsIfNotLoaded()
     }
 
     fun updateLocation(newLocation: Location) {
@@ -154,23 +154,31 @@ class MainActivity : AppCompatActivity() {
 
         currentPositionMarker = Marker(map)
         currentPositionMarker.position = startPoint
-        map.overlayManager.add(currentPositionMarker)
+
         drawEventMarkers()
         map.invalidate()
     }
 
     private fun drawEventMarkers() {
-        try {
-            vm.events.value?.let {
+
+            mMapViewModel.events.value?.let {
+                map.overlays.removeAll(map.overlays)
+                map.overlays.add(currentPositionMarker)
+
                 for (event in it) {
-                    drawEventMarker(event)
-                    putClickableEventMarker(event)
+                    try {
+                        drawEventMarker(event)
+                        putClickableEventMarker(event)
+                    } catch (e: IllegalArgumentException) {
+                        val tmp = event.domain.longitude
+                        event.domain.longitude = event.domain.latitude
+                        event.domain.latitude = tmp
+                        drawEventMarker(event)
+                        putClickableEventMarker(event)
+                    }
                 }
             }
             map.invalidate()
-        } catch (e: IllegalArgumentException) {
-            Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show()
-        }
     }
 
     private fun drawEventMarker(eventUi: EventUi) {
@@ -179,8 +187,8 @@ class MainActivity : AppCompatActivity() {
         val publication = PublicationOverlay()
 
         publication.setEventId(eventUi.domain.id!!)
-        publication.setPosition(GeoPoint(eventUi.domain.longitude!!, eventUi.domain.latitude!!)) // TODO
-//        publication.setPosition(GeoPoint(eventUi.domain.latitude!!, eventUi.domain.longitude!!))
+//        publication.setPosition(GeoPoint(eventUi.domain.longitude!!, eventUi.domain.latitude!!)) // TODO
+        publication.setPosition(GeoPoint(eventUi.domain.latitude!!, eventUi.domain.longitude!!))
         publication.setIcon(ContextCompat.getDrawable(this, R.drawable.icon)!!.toBitmap())
 
 
@@ -195,8 +203,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun putClickableEventMarker(eventUi: EventUi) {
         val marker = EventMarker(map, eventUi.domain.id!!)
-        marker.position = GeoPoint(eventUi.domain.longitude!!, eventUi.domain.latitude!!) // TODO
-//        marker.position = GeoPoint(eventUi.domain.latitude!!, eventUi.domain.longitude!!) // TODO
+//        marker.position = GeoPoint(eventUi.domain.longitude!!, eventUi.domain.latitude!!) // TODO
+        marker.position = GeoPoint(eventUi.domain.latitude!!, eventUi.domain.longitude!!) // TODO
         marker.setVisible(false)
 
         marker.setOnMarkerClickListener { marker, _ ->
@@ -289,6 +297,12 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         initLocation()
         startLocationUpdates()
+
+        if (mMapViewModel.mapShouldBeUpdated) {
+            mMapViewModel.mapShouldBeUpdated = false
+            mMapViewModel.reloadAllEvents()
+            drawEventMarkers()
+        }
     }
 
     override fun onPause() {
