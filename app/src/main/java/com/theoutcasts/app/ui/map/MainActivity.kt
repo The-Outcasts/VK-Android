@@ -1,4 +1,4 @@
-package com.theoutcasts.app
+package com.theoutcasts.app.ui.map
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -18,13 +18,14 @@ import org.osmdroid.api.IMapController
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.Task
+import com.theoutcasts.app.BuildConfig
+import com.theoutcasts.app.R
 import com.theoutcasts.app.databinding.ActivityMainBinding
 import com.theoutcasts.app.location.LocationProviderChangedReceiver
 import com.theoutcasts.app.location.MyEventLocationSettingsChange
 import com.theoutcasts.app.location.PublicationOverlay
 import com.theoutcasts.app.ui.createpublication.CreatePublicationActivity
 import com.theoutcasts.app.ui.eventpublication.EventPublicationActivity
-import com.theoutcasts.app.ui.map.EventMarker
 import com.theoutcasts.app.ui.map.model.EventUi
 import com.theoutcasts.app.ui.map.vm.MapViewModel
 import com.theoutcasts.app.ui.map.vm.MapViewModelFactory
@@ -34,8 +35,14 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import timber.log.Timber
 import org.osmdroid.views.overlay.Marker
-import org.osmdroid.views.overlay.OverlayItem
 
+/*
+*
+*  +---------------------------------- MESS ----------------------------------+
+*                        Move setup, logic into ViewModel
+*  +--------------------------------------------------------------------------+
+*
+*/
 
 class MainActivity : AppCompatActivity() {
     private lateinit var vm: MapViewModel
@@ -47,9 +54,11 @@ class MainActivity : AppCompatActivity() {
     private var locationRequest: LocationRequest
     private var requestingLocationUpdates = false
 
-    companion object {
-        const val REQUEST_CHECK_SETTINGS = 20202
-    }
+    private lateinit var binding: ActivityMainBinding
+    private lateinit var map: MapView
+    private var startPoint: GeoPoint = GeoPoint(55.772932, 37.698825) //Москва
+    private lateinit var mapController: IMapController
+    private lateinit var currentPositionMarker: Marker
 
     private val zoomNumber = 15 //  Initial zoom
 
@@ -62,11 +71,11 @@ class MainActivity : AppCompatActivity() {
                 priority = LocationRequest.PRIORITY_HIGH_ACCURACY
                 maxWaitTime = 1000
             }
+
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 for (location in locationResult.locations) {
-                    // Update UI with location data
-                    updateLocation(location) //MY function
+                    updateLocation(location)
                 }
             }
         }
@@ -85,16 +94,7 @@ class MainActivity : AppCompatActivity() {
                 //initMap() if settings are ok
             }
         }
-
-
     }
-
-    private lateinit var binding: ActivityMainBinding
-    private lateinit var map: MapView
-    private var startPoint: GeoPoint = GeoPoint(55.772932, 37.698825) //Москва
-    private lateinit var mapController: IMapController
-    private lateinit var currentPositionMarker: Marker
-    private val markerItems = ArrayList<OverlayItem>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         vm = ViewModelProvider(this, MapViewModelFactory())[MapViewModel::class.java]
@@ -103,24 +103,19 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, it, Toast.LENGTH_LONG).show()
         }
 
-        vm.user.observe(this) {
-            Toast.makeText(this, it.username, Toast.LENGTH_LONG).show()
-        }
-
         vm.events.observe(this) {
-            drawPublicationOverlays()
-            //
+            drawEventMarkers()
         }
 
         super.onCreate(savedInstanceState)
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree()) //Init report type
         }
+
         val br: BroadcastReceiver = LocationProviderChangedReceiver()
         val filter = IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION)
         registerReceiver(br, filter)
 
-        //LocalBroadcastManager.getInstance(this).registerReceiver(locationProviderChange)
         Configuration.getInstance()
             .load(applicationContext, this.getPreferences(Context.MODE_PRIVATE))
         binding = ActivityMainBinding.inflate(layoutInflater) //ADD THIS LINE
@@ -160,16 +155,16 @@ class MainActivity : AppCompatActivity() {
         currentPositionMarker = Marker(map)
         currentPositionMarker.position = startPoint
         map.overlayManager.add(currentPositionMarker)
-        drawPublicationOverlays()
+        drawEventMarkers()
         map.invalidate()
     }
 
-    private fun drawPublicationOverlays() {
+    private fun drawEventMarkers() {
         try {
             vm.events.value?.let {
                 for (event in it) {
-                    drawPublicationOverlay(event)
                     drawEventMarker(event)
+                    putClickableEventMarker(event)
                 }
             }
             map.invalidate()
@@ -178,14 +173,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun drawPublicationOverlay(eventUi: EventUi) {
-        val notLoadedPictureBitmap = ContextCompat.getDrawable(this,R.drawable.logo_black)!!.toBitmap()
+    private fun drawEventMarker(eventUi: EventUi) {
+        val notLoadedPictureBitmap = ContextCompat.getDrawable(this, R.drawable.logo_black)!!.toBitmap()
 
         val publication = PublicationOverlay()
 
         publication.setEventId(eventUi.domain.id!!)
-        publication.setPosition(GeoPoint(eventUi.domain.longitude!!, eventUi.domain.latitude!!))
-        publication.setIcon(ContextCompat.getDrawable(this,R.drawable.icon)!!.toBitmap())
+        publication.setPosition(GeoPoint(eventUi.domain.longitude!!, eventUi.domain.latitude!!)) // TODO
+        publication.setIcon(ContextCompat.getDrawable(this, R.drawable.icon)!!.toBitmap())
 
 
         if (eventUi.pictureBitmap == null) {
@@ -197,17 +192,17 @@ class MainActivity : AppCompatActivity() {
        map.overlayManager.add(publication)
     }
 
-    private fun drawEventMarker(eventUi: EventUi) {
+    private fun putClickableEventMarker(eventUi: EventUi) {
         val marker = EventMarker(map, eventUi.domain.id!!)
-        marker.position = GeoPoint(eventUi.domain.longitude!!, eventUi.domain.latitude!!)
+        marker.position = GeoPoint(eventUi.domain.longitude!!, eventUi.domain.latitude!!) // TODO
         marker.setVisible(false)
 
         marker.setOnMarkerClickListener { marker, _ ->
             val eventMarker = marker as EventMarker
 
-                val intent = Intent(this, EventPublicationActivity::class.java)
-                intent.putExtra("EVENT_ID", eventUi.domain.id!!)
-                startActivity(intent)
+            val intent = Intent(this, EventPublicationActivity::class.java)
+            intent.putExtra("EVENT_ID", eventUi.domain.id!!)
+            startActivity(intent)
 
             true
         }
@@ -297,5 +292,10 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         stopLocationUpdates()
+    }
+
+
+    companion object {
+        const val REQUEST_CHECK_SETTINGS = 20202
     }
 }

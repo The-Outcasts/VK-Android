@@ -13,8 +13,7 @@ class MapViewModelFactory : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return MapViewModel(
             EventInteractor(EventRepositoryImpl()),
-            ImageInteractor(ImageRepositoryImpl()),
-            UserInteractor(UserRepositoryImpl())
+            ImageInteractor(ImageRepositoryImpl())
         ) as T
     }
 }

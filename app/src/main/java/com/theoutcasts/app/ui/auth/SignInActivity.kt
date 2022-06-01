@@ -8,7 +8,7 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.theoutcasts.app.MainActivity
+import com.theoutcasts.app.ui.map.MainActivity
 import com.theoutcasts.app.R
 import com.theoutcasts.app.ui.auth.vm.SignInViewModel
 import com.theoutcasts.app.ui.auth.vm.factory.SignInViewModelFactory

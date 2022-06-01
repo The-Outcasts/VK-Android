@@ -20,8 +20,7 @@ import org.osmdroid.views.overlay.OverlayItem
 
 class MapViewModel(
     private val eventInteractor: EventInteractor,
-    private val imageInteractor: ImageInteractor,
-    private val userInteractor: UserInteractor
+    private val imageInteractor: ImageInteractor
 ) : ViewModel() {
 
     private val errorMessageLiveData = MutableLiveData<String>()
@@ -29,9 +28,6 @@ class MapViewModel(
 
     val errorMessage: LiveData<String> = errorMessageLiveData
     val events: LiveData<List<EventUi>> = eventsLiveData
-
-    private val _user = MutableLiveData<User>()
-    val user: LiveData<User> = _user
 
     fun loadEvents() {
         GlobalScope.launch(Dispatchers.IO) {

@@ -22,7 +22,7 @@
         <activity
                 android:name=".ui.eventpublication.EventPublicationActivity"
                 android:exported="true"
-                android:parentActivityName=".MainActivity">
+                android:parentActivityName=".ui.map.MainActivity">
 
             <!--
                 <intent-filter>
@@ -44,12 +44,12 @@
                 android:name=".ui.auth.SignInActivity"
                 android:exported="false" />
         <activity
-                android:name=".MainActivity"
+                android:name=".ui.map.MainActivity"
                 android:exported="true" />
         <activity
                 android:name=".PublicationActivity"
                 android:exported="false"
-                android:parentActivityName=".MainActivity" />
+                android:parentActivityName=".ui.map.MainActivity" />
 
         <receiver
                 android:name=".location.LocationProviderChangedReceiver"
@@ -64,10 +64,10 @@
         <activity
                 android:name=".NewPublicationActivity"
                 android:exported="true"
-                android:parentActivityName=".MainActivity">
+                android:parentActivityName=".ui.map.MainActivity">
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
-                    android:value="com.theoutcasts.app.MainActivity" />
+                    android:value="com.theoutcasts.app.ui.map.MainActivity" />
         </activity>
     </application>
 
