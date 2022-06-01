@@ -180,6 +180,7 @@ class MainActivity : AppCompatActivity() {
 
         publication.setEventId(eventUi.domain.id!!)
         publication.setPosition(GeoPoint(eventUi.domain.longitude!!, eventUi.domain.latitude!!)) // TODO
+//        publication.setPosition(GeoPoint(eventUi.domain.latitude!!, eventUi.domain.longitude!!))
         publication.setIcon(ContextCompat.getDrawable(this, R.drawable.icon)!!.toBitmap())
 
 
@@ -195,6 +196,7 @@ class MainActivity : AppCompatActivity() {
     private fun putClickableEventMarker(eventUi: EventUi) {
         val marker = EventMarker(map, eventUi.domain.id!!)
         marker.position = GeoPoint(eventUi.domain.longitude!!, eventUi.domain.latitude!!) // TODO
+//        marker.position = GeoPoint(eventUi.domain.latitude!!, eventUi.domain.longitude!!) // TODO
         marker.setVisible(false)
 
         marker.setOnMarkerClickListener { marker, _ ->
