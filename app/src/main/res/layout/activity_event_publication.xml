@@ -29,7 +29,7 @@
                     android:layout_height="match_parent"
                     android:layout_marginLeft="20dp"
                     android:src="@drawable/icon_user_80"
-                    android:background="@color/white"/>
+                    android:background="@android:color/transparent" />
 
             <TextView
                     android:id="@+id/tv_title"
@@ -64,7 +64,7 @@
                     android:layout_marginLeft="40dp"
                     android:scaleType="centerInside"
                     android:src="@drawable/icon_heart_empty_80"
-                    android:background="@color/design_default_color_on_primary" />
+                    android:background="@android:color/transparent"  />
 
             <TextView
                     android:id="@+id/tv_like_count"
@@ -81,7 +81,7 @@
                     android:src="@drawable/icon_eye3_50"
                     android:layout_margin="15dp"
                     android:scaleType="centerInside"
-                    android:background="@color/design_default_color_on_primary"
+                    android:background="@android:color/transparent"
                     android:layout_weight="1" />
 
             <TextView
@@ -99,7 +99,7 @@
                     android:layout_marginRight="40dp"
                     android:scaleType="centerInside"
                     android:src="@drawable/icon_comments_86"
-                    android:background="@color/design_default_color_on_primary" />
+                    android:background="@android:color/transparent"  />
 
         </LinearLayout>
 
