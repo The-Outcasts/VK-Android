@@ -90,7 +90,7 @@ class MainActivity : AppCompatActivity() {
             Timber.d("Permissions granted $allAreGranted")
             if (allAreGranted) {
                 initCheckLocationSettings()
-                //initMap() if settings are ok
+                initMap()
             }
         }
     }
@@ -101,6 +101,7 @@ class MainActivity : AppCompatActivity() {
         Configuration.getInstance()
             .load(applicationContext, this.getPreferences(Context.MODE_PRIVATE))
         binding = ActivityMainBinding.inflate(layoutInflater) //ADD THIS LINE
+        setContentView(binding.root)
 
         // Move to stateholder
         val br: BroadcastReceiver = LocationProviderChangedReceiver()
@@ -123,7 +124,6 @@ class MainActivity : AppCompatActivity() {
         map.setTileSource(TileSourceFactory.MAPNIK)
         map.setMultiTouchControls(true)
         mapController = map.controller
-        setContentView(binding.root)
         val appPerms = arrayOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_NETWORK_STATE,
@@ -131,6 +131,8 @@ class MainActivity : AppCompatActivity() {
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.INTERNET
         )
+
+        currentPositionMarker = Marker(map)
 
         activityResultLauncher.launch(appPerms)
 
@@ -160,7 +162,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun drawEventMarkers() {
-
             mMapViewModel.events.value?.let {
                 map.overlays.removeAll(map.overlays)
                 map.overlays.add(currentPositionMarker)
@@ -282,7 +283,6 @@ class MainActivity : AppCompatActivity() {
         mapController.setZoom(zoomNumber)
         mapController.setCenter(startPoint)
         map.invalidate()
-
     }
 
     override fun onResume() {
